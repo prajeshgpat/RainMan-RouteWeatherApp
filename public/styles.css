@@ -1,0 +1,334 @@
+html, body, h1 {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #F6F0EA, #eac0a2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+/* Set the height and width of the map container */
+.navbar {
+  background: #fff;
+  padding-bottom: 5px;
+  padding-left: 10px;
+  padding-top: 10px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  z-index: 3; /* Ensure the nav bar is displayed above other elements */
+}
+.arrow-container {
+  padding-bottom: 5px;
+  padding-left: 5px;
+  color: #166aea;
+  font-size: 20px;
+  justify-content: left;
+}
+.fa-arrow-left-long {
+  display: inline-block;
+  font-size: 20px;
+  color: #166aea;
+  padding: 8px;
+  background-color: #f2f2f2;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  text-decoration: none;
+}
+.fa-arrow-left-long:hover {
+  background-color: #d9d9d9;
+  transform: translateY(1px);
+}
+
+.title {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 900;
+  font-size: 24px;
+  color: #166aea;
+  margin-top: 10px;
+  margin-left: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex:1;
+}
+
+.icon-container {
+  padding: 5px;
+  padding-bottom: 5px;
+  padding-right: 10px;
+  margin-top: 10px;
+  margin-right: 10px;
+  color: #166aea;
+  font-size: 20px;
+}
+.heading {
+  text-align: center;
+  margin-top: 50px;
+  display: flex; /* Use flexbox for centering */
+  flex-direction: column; /* Stack elements vertically */
+  align-items: center; /* Center elements horizontally */
+}
+
+h1 {
+  font-family: 'Noto Serif', serif;
+  font-weight: 700;
+  font-size: 30px;
+  color: rgb(1, 33, 32);
+  margin-bottom: 20px;
+  margin-top: 10px;
+}
+h2 {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+  font-size: 15px;
+  color: rgb(1, 33, 32);
+  margin-bottom: 20px;
+  margin-left: 50px;
+  margin-right: 50px;
+}
+
+.btn {
+  display: inline-block;
+  padding: 12px 24px;
+  background-color: #10866c;
+  color: #FFF;
+  text-decoration: none;
+  border-radius: 30px;
+  font-size: 18px;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+  transition: transform 0.3s ease;
+}
+.btn:hover {
+  background-color: #0b6049;
+  transform: translateY(-5px);
+}
+
+.btn-slide-up {
+  animation: slide-up 0.8s ease forwards;
+}
+
+/* Add styling for the bordered image */
+.bordered-image {
+  border: 7px solid #FFF;
+  border-radius: 30px; /* Add border-radius for rounded corners (optional) */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); /* Add a box shadow for a visual effect (optional) */
+  max-width: 50%; /* Ensure the image doesn't exceed its container's width */
+  margin-top: 30px;
+  width: 50%;
+}
+
+/* Optional: Adjust the max-width of the image for responsiveness */
+@media screen and (max-width: 768px) {
+  .bordered-image {
+    max-width: 70%; /* Adjust as needed */
+  }
+}
+
+
+/* Map App CSS */
+/* Set the width of the search input field and buttons */
+#search-container {
+  position: absolute; /* Use absolute positioning to place the search container over the map */
+  top: 75px; /* Adjust the top position as needed to create space below the navigation bar */
+  left: 50%;
+  transform: translateX(-50%); /* Center the search container horizontally */
+  display: flex; /* Display the search container and buttons in a row */
+  align-items: center; /* Align items vertically center */
+  justify-content: center; /* Align items horizontally center */
+  max-width: 100%;
+  z-index: 2; /* Ensure the search container and buttons are displayed above the map */
+}
+
+/* Set the width of the search input field and buttons */
+#destination-container {
+  position: absolute; /* Use absolute positioning to place the search container over the map */
+  top: 115px; /* Adjust the top position as needed to create space below the navigation bar */
+  left: 50%;
+  transform: translateX(-50%); /* Center the search container horizontally */
+  display: flex; /* Display the search container and buttons in a row */
+  align-items: center; /* Align items vertically center */
+  justify-content: center; /* Align items horizontally center */
+  max-width: 100%;
+  z-index: 2; /* Ensure the search container and buttons are displayed above the map */
+}
+
+/* Set the width of the search input field and buttons */
+#button-container {
+  position: absolute; /* Use absolute positioning to place the search container over the map */
+  top: 150px; /* Adjust the top position as needed to create space below the navigation bar */
+  left: 50%;
+  transform: translateX(-50%); /* Center the search container horizontally */
+  display: flex; /* Display the search container and buttons in a row */
+  align-items: center; /* Align items vertically center */
+  justify-content: center; /* Align items horizontally center */
+  max-width: 100%;
+  z-index: 2; /* Ensure the search container and buttons are displayed above the map */
+}
+
+#search-input {
+  padding-left: 15px;
+  font-size: 14px;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+  height: 30px; /* Adjust the height as needed */
+  margin-right: 1px;
+  border-radius: 39px; /* Set the border-radius to half of the height to make it rounded */
+  max-width: 100%;
+  width: 400px;
+  flex: 1; /* Allow the search input to take available space */
+  border: none;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+#destination-input {
+  padding-left: 15px;
+  font-size: 14px;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+  height: 30px; /* Adjust the height as needed */
+  margin-right: 1px;
+  border-radius: 39px; /* Set the border-radius to half of the height to make it rounded */
+  max-width: 100%;
+  width: 400px;
+  flex: 1; /* Allow the search input to take available space */
+  border: none;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Position the buttons below the search bar */
+#clear-button,
+#current-location-button {
+  font-size: 14px;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+  padding: 5px 10px;
+  background-color: #166aea;
+  color: white;
+  border: none;
+  border-radius: 39px;
+  cursor: pointer;
+  margin-top: 5px; /* Add margin to separate buttons from the search bar */
+  margin-inline: 2px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+#clear-button:hover,
+#current-location-button:hover {
+  background-color: #3283ff;
+}
+
+/* Adjust margin to move the map container below the search container */
+#map-container {
+  /* Set the height to fill the remaining viewport space below the search container */
+  height: 96vh; /* Subtract the height of the navigation bar and search container from the full viewport height */
+  margin-top: 32px; /* Add a margin to create space for the navigation bar and search container */
+  width: 100%;
+  position: absolute; /* Add this to make the weather info window relative to this container */
+  z-index: 0;
+}
+
+#map {
+  width: 100%;
+  height: 100%; /* Make the map fill the entire container */
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Hide any overflowing content, including the weather info window */
+  position: absolute; /* Make the map container position relative for absolute positioning of weather info */
+}
+
+.weather-info-container {
+  height: 96vh; /* Subtract the height of the navigation bar and search container from the full viewport height */
+  margin-top: 32px;
+  width: 100%;
+  position: absolute;
+  bottom: 0px; /* Adjust the distance from the bottom as needed */
+  left: 50%;
+  background-color: #c1c1c1;
+  width: 90%;
+  max-width: 400px;
+  padding: 10px;
+  display: none;
+  opacity: 0;
+  z-index: 10;
+}
+
+.weather-info-window.active .weather-info-content{
+  display: flex;
+  opacity: 1;
+  z-index: 10;
+  animation: slide-up 0.8s ease forwards;
+}
+
+.weather-info-content {
+  padding: 10px;
+  width: 400px;
+  margin-top: 450px;
+  background-color: #ffffff;
+  border-radius: 39px;
+  text-align: center;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  z-index: 10;
+  transform: translateY(20px);
+  opacity: 0.5;
+}
+
+.weather-info-content img {
+  width: 50px;
+  height: 50px;
+  margin-top: 5px;
+}
+
+.weather-info-content h3 {
+  margin: 0;
+}
+
+.weather-info-content p {
+  margin: 5px 0;
+}
+
+.weather-info-icon {
+  width: 50px;
+  height: 50px;
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(20px); /* Start position of the content */
+    opacity: 0.5; /* Start with opacity 0.5 to make it fade in */
+  }
+  to {
+    transform: translateY(0); /* End position of the content (slid up) */
+    opacity: 1; /* Fully visible */
+  }
+}
+
+/* Apply the styles below 700px screen width */
+@media screen and (max-width: 700px) {
+  #search-input {
+    width: 250px; /* Set the width to 200px for screen width below 700px */
+  }
+  #destination-input {
+    width: 250px; /* Set the width to 200px for screen width below 700px */
+  }
+  #current-location-button {
+    width: 130px;
+  }
+  .weather-info-content {
+    width: 250px;
+  }
+  .weather-info-container {
+    width: 250px;
+  }
+}
