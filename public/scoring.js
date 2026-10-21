@@ -5,42 +5,79 @@ var BADNESS_WEIGHT_MAX = 0.6
 var BADNESS_WEIGHT_MEAN = 0.4
 var GOOD_BELOW = 0.2
 var OKAY_BELOW = 0.5
-var HOURLY_LENGTH = 48
+var MAX_DEPARTURE_HOURS = 48
+var ICE_MAX_TEMP_F = 34
+var NIGHT_PENALTY = 0.1
 
-// Base badness (0..1) for an OpenWeather condition id
-function conditionBadness(id) {
-  if (id >= 200 && id < 300) return 1.0 // thunderstorm
-  if (id >= 300 && id < 400) return 0.3 // drizzle
-  if (id >= 500 && id < 600) {
-    if (id === 511) return 1.0 // freezing rain
-    if ((id >= 502 && id <= 504) || id === 522 || id === 531) return 0.9 // heavy rain
-    if (id === 501 || id === 521) return 0.6 // moderate rain
-    if (id === 500 || id === 520) return 0.4 // light rain
-    return 0.6
-  }
-  if (id >= 600 && id < 700) return 1.0 // snow
-  if (id === 771 || id === 781) return 1.0 // squall, tornado
-  if (id >= 700 && id < 800) return 0.4 // fog, dust, smoke
-  return 0 // clear or clouds (800-804), unknown ids
+// Base badness (0..1) by WMO weather code (Open-Meteo weather_code)
+var WMO_BADNESS = {
+  0: 0, 1: 0, 2: 0, 3: 0,
+  45: 0.4, 48: 0.6,
+  51: 0.2, 53: 0.3, 55: 0.4,
+  56: 1.0, 57: 1.0,
+  61: 0.4, 63: 0.6, 65: 0.9,
+  66: 1.0, 67: 1.0,
+  71: 0.8, 73: 1.0, 75: 1.0, 77: 0.8,
+  80: 0.4, 81: 0.6, 82: 0.9,
+  85: 1.0, 86: 1.0,
+  95: 1.0, 96: 1.0, 99: 1.0,
 }
 
-// Badness of one hourly forecast entry, from 0 (great) to 1 (awful)
+var WMO_DESCRIPTIONS = {
+  0: "clear sky", 1: "mainly clear", 2: "partly cloudy", 3: "overcast",
+  45: "fog", 48: "rime fog",
+  51: "light drizzle", 53: "drizzle", 55: "heavy drizzle",
+  56: "freezing drizzle", 57: "heavy freezing drizzle",
+  61: "light rain", 63: "rain", 65: "heavy rain",
+  66: "freezing rain", 67: "heavy freezing rain",
+  71: "light snow", 73: "snow", 75: "heavy snow", 77: "snow grains",
+  80: "light showers", 81: "showers", 82: "heavy showers",
+  85: "light snow showers", 86: "snow showers",
+  95: "thunderstorm", 96: "thunderstorm with hail", 99: "thunderstorm with heavy hail",
+}
+
+// Base badness (0..1) for a WMO weather code; unknown codes count as fine
+function conditionBadness(code) {
+  var b = WMO_BADNESS[Number(code)]
+  return b === undefined ? 0 : b
+}
+
+function conditionDescription(code) {
+  return WMO_DESCRIPTIONS[Number(code)] || "unknown"
+}
+
+// Liquid precipitation (drizzle, rain, showers) that freezes into ice on cold roads
+function isLiquidPrecip(code) {
+  var c = Number(code)
+  return (c >= 51 && c <= 55) || (c >= 61 && c <= 65) || (c >= 80 && c <= 82)
+}
+
+function isIcy(entry) {
+  return !!entry && isLiquidPrecip(entry.code) && entry.temp != null && Number(entry.temp) <= ICE_MAX_TEMP_F
+}
+
+function isNight(entry) {
+  return !!entry && entry.isDay === false
+}
+
+// Badness of one hourly forecast entry { temp, pop, wind, gust, code, isDay }, 0 (great) to 1 (awful)
 function hourBadness(entry) {
   if (!entry) return 0
-  var w = entry.weather && entry.weather[0]
-  var id = w ? Number(w.id) : 800
-  var badness = Math.max(conditionBadness(id), (Number(entry.pop) || 0) * 0.5)
-  var wind = Number(entry.wind_speed) || 0
+  var badness = Math.max(conditionBadness(entry.code), (Number(entry.pop) || 0) * 0.5)
+  if (isIcy(entry)) badness = 1
+  var wind = Number(entry.wind) || 0
   if (wind > 30) badness += 0.3
   else if (wind > 20) badness += 0.15
+  if ((Number(entry.gust) || 0) > 45) badness += 0.15
+  if (isNight(entry)) badness += NIGHT_PENALTY
   return Math.min(1, Math.max(0, badness))
 }
 
 // Index into the hourly array for departure offset d and ETA t (hours), clamped
 function hourIndex(d, etaHours, length) {
-  var len = length == null ? HOURLY_LENGTH : length
   var idx = Math.round(d + etaHours)
-  return Math.min(Math.max(idx, 0), Math.max(len - 1, 0))
+  if (length != null) idx = Math.min(idx, Math.max(length - 1, 0))
+  return Math.max(idx, 0)
 }
 
 // The forecast entry a driver meets at a sample when leaving d hours from now
@@ -93,9 +130,9 @@ function bestWindow(scores) {
   return { start: start, end: end, score: min }
 }
 
-// Largest departure offset (hours) the 48h forecast can cover; negative if the trip is too long
-function maxDepartureOffset(tripHours) {
-  return Math.min(24, HOURLY_LENGTH - 1 - Math.ceil(tripHours))
+// Largest departure offset (hours) the forecast can cover; negative if the trip is too long
+function maxDepartureOffset(tripHours, hourlyLength) {
+  return Math.min(MAX_DEPARTURE_HOURS, hourlyLength - 1 - Math.ceil(tripHours))
 }
 
 // Worst conditions met along the route when leaving d hours from now
@@ -106,11 +143,16 @@ function worstStop(samples, d) {
     if (!entry) continue
     var b = hourBadness(entry)
     if (worst === null || b > worst.badness) {
-      var w = entry.weather && entry.weather[0]
+      var description = conditionDescription(entry.code)
+      if (isIcy(entry)) description += " (icy)"
+      if (isNight(entry)) description += " at night"
       worst = {
         sampleIndex: i,
         badness: b,
-        description: w && w.description ? String(w.description).toLowerCase() : "unknown",
+        description: description,
+        code: entry.code,
+        isDay: entry.isDay !== false,
+        wind: Number(entry.wind) || 0,
       }
     }
   }
@@ -137,7 +179,11 @@ function computeDepartures(samples, maxD, nowMs) {
 
 if (typeof module !== "undefined") {
   module.exports = {
+    WMO_BADNESS: WMO_BADNESS,
+    WMO_DESCRIPTIONS: WMO_DESCRIPTIONS,
     conditionBadness: conditionBadness,
+    conditionDescription: conditionDescription,
+    isIcy: isIcy,
     hourBadness: hourBadness,
     hourIndex: hourIndex,
     entryFor: entryFor,
