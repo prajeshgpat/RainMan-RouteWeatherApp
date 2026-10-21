@@ -31,10 +31,11 @@
       sizes="16x16"
       href="images/favicon_package/favicon-16x16.png"
     />
-    <link rel="manifest" href="images/favicon_package/site.webmanifest" />
+    <link rel="manifest" href="manifest.webmanifest" />
     <link rel="mask-icon" href="images/favicon_package/safari-pinned-tab.svg" color="#5bbad5" />
     <meta name="msapplication-TileColor" content="#da532c" />
-    <meta name="theme-color" content="#ffffff" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1b232e" media="(prefers-color-scheme: dark)" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -51,9 +52,9 @@
   <body>
     <nav class="navbar">
       <div class="title">RainMan</div>
-      <div class="icon-container">
-        <i class="fa-solid fa-umbrella"></i>
-      </div>
+      <button id="unit-toggle" class="unit-toggle" type="button" aria-label="Temperature unit: Fahrenheit. Tap to switch to Celsius" title="Switch °F / °C">
+        <span class="unit-opt active" data-unit="F">°F</span><span class="unit-opt" data-unit="C">°C</span>
+      </button>
     </nav>
     <main id="map-container">
       <div id="map"></div>
@@ -88,10 +89,20 @@
           </div>
           <div class="route-actions">
             <button id="current-location-button" type="button">Current Location</button>
+            <button id="share-button" type="button" hidden>Share</button>
             <button id="clear-button" type="button">Clear</button>
           </div>
+          <div id="recent-trips" class="recent-trips" aria-label="Recent trips" hidden></div>
         </div>
+        <div id="alert-banner" class="alert-banner" hidden></div>
         <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+      </div>
+
+      <button id="radar-button" class="map-btn" type="button" aria-pressed="false" aria-label="Show rain radar" title="Rain radar">
+        <i class="fa-solid fa-cloud-showers-heavy" aria-hidden="true"></i><span>Radar</span>
+      </button>
+      <div id="radar-credit" class="radar-credit" hidden>
+        Radar by <a href="https://www.rainviewer.com/" target="_blank" rel="noopener">RainViewer</a>
       </div>
 
       <div id="weather-info-window" class="weather-info-window" role="dialog" aria-label="Weather details" hidden>
@@ -106,7 +117,12 @@
     </main>
 
     <section id="time-bar" aria-label="Best time to leave" hidden>
+      <div id="route-chips" class="rc-wrap" hidden>
+        <div id="rc-list" class="rc-list" role="group" aria-label="Route options"></div>
+        <button id="rc-hint" class="rc-hint" type="button" hidden></button>
+      </div>
       <div class="tb-header">
+        <img id="tb-icon" class="tb-icon" src="" alt="" hidden />
         <div class="tb-heading">
           <div id="tb-title" class="tb-title"></div>
           <div id="tb-sub" class="tb-sub"></div>
@@ -122,12 +138,21 @@
         <li><span class="swatch good"></span>Good</li>
         <li><span class="swatch okay"></span>Okay</li>
         <li><span class="swatch bad"></span>Bad</li>
+        <li><span class="swatch night"></span>Night</li>
         <li class="tb-legend-note"><span class="tb-star" aria-hidden="true">★</span> Best window</li>
       </ul>
+      <p class="tb-credit">
+        Weather data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a>
+        (CC BY 4.0) · Icons by <a href="https://github.com/basmilius/weather-icons" target="_blank" rel="noopener">Meteocons</a>
+      </p>
     </section>
 
     <script src="scoring.js"></script>
+    <script src="weather.js"></script>
+    <script src="markers.js"></script>
+    <script src="features.js"></script>
     <script src="timebar.js"></script>
+    <script src="panels.js"></script>
     <script src="script.js"></script>
     <script
       async
