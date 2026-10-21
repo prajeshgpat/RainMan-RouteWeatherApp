@@ -419,9 +419,19 @@ button:focus-visible {
   background: var(--bad);
 }
 
+.tb-night {
+  height: 4px;
+  margin-top: 3px;
+  border-radius: 2px;
+}
+
+.tb-seg.night .tb-night {
+  background: #3b4a78;
+}
+
 .tb-label {
   height: 16px;
-  margin-top: 3px;
+  margin-top: 1px;
   font-size: 11px;
   white-space: nowrap;
   text-align: center;
@@ -524,6 +534,11 @@ button:focus-visible {
 
 .swatch.bad {
   background: var(--bad);
+}
+
+.swatch.night {
+  height: 4px;
+  background: #3b4a78;
 }
 
 @media screen and (max-width: 700px) {

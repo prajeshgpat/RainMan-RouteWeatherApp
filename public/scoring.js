@@ -171,12 +171,14 @@ function computeDepartures(samples, maxD, nowMs) {
   var out = []
   for (var d = 0; d <= maxD; d++) {
     var score = departureScore(samples, d)
+    var first = entryFor(samples[0], d)
     out.push({
       d: d,
       timeMs: d === 0 ? nowMs : hourStart.getTime() + d * 3600000,
       score: score,
       cls: classify(score),
       worst: worstStop(samples, d),
+      night: isNight(first), // it is dark at the start of the drive
     })
   }
   return out

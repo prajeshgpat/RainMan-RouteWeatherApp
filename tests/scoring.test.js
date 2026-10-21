@@ -155,3 +155,10 @@ test("computeDepartures labels and classifies each hour", () => {
   assert.deepStrictEqual(deps.map((x) => x.cls), ["okay", "okay", "good", "good", "good"])
   assert.strictEqual(deps[0].worst.description, "light rain")
 })
+
+test("computeDepartures flags departures that start at night", () => {
+  const sample = { etaHours: 0, hourly: hourlyOf((h) => Object.assign({}, entry(0), { isDay: h !== 1 && h !== 2 })) }
+  const deps = s.computeDepartures([sample], 3, Date.now())
+  assert.deepStrictEqual(deps.map((x) => x.night), [false, true, true, false])
+  assert.strictEqual(s.computeDepartures([{ etaHours: 0, hourly: null }], 1, Date.now())[0].night, false)
+})

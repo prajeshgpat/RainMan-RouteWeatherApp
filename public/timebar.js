@@ -3,6 +3,7 @@
 //
 // model = {
 //   departures: [{ d, timeMs, score, cls, worst: { sampleIndex, description } | null }],
+//   (a departure with night: true starts after dark and gets a night stripe)
 //   best: { start, end } | null,   // indexes into departures
 //   selected: 0,                   // selected departure offset
 //   loading: false,                // show the "Updating forecast..." spinner
@@ -24,7 +25,7 @@ function tbDescribe(model, dep) {
 
 function tbSegmentText(model, dep) {
   var when = dep.d === 0 ? "now" : tbHourLabel(dep.timeMs)
-  return "Leave " + when + ": " + TB_CLASS_LABEL[dep.cls] + ", " + tbDescribe(model, dep)
+  return "Leave " + when + (dep.night ? " (night)" : "") + ": " + TB_CLASS_LABEL[dep.cls] + ", " + tbDescribe(model, dep)
 }
 
 function tbTitle(model) {
@@ -100,6 +101,7 @@ function renderTimeBar(model, onSelect) {
       if (i === model.best.end) btn.classList.add("best-last")
     }
     if (isMidnight) btn.classList.add("day-start")
+    if (dep.night) btn.classList.add("night")
     btn.setAttribute("aria-pressed", dep.d === model.selected ? "true" : "false")
     var text = tbSegmentText(model, dep)
     btn.setAttribute("aria-label", text)
@@ -110,6 +112,11 @@ function renderTimeBar(model, onSelect) {
     block.setAttribute("aria-hidden", "true")
     if (inBest && i === model.best.start) block.textContent = "★"
     btn.appendChild(block)
+
+    var nightMark = document.createElement("span")
+    nightMark.className = "tb-night"
+    nightMark.setAttribute("aria-hidden", "true")
+    btn.appendChild(nightMark)
 
     var label = document.createElement("span")
     label.className = "tb-label"
