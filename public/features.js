@@ -73,14 +73,16 @@ function mergeAlerts(collections) {
   return mergeAlertLists(lists)
 }
 
-// Lists of already normalized alerts -> unique by id, worst first
+// Lists of already normalized alerts -> unique by id and by event + area, worst first
 function mergeAlertLists(lists) {
-  var byId = {}
+  var seen = {}
   var out = []
   lists.forEach(function (list) {
     list.forEach(function (a) {
-      if (byId[a.id]) return
-      byId[a.id] = true
+      var sameKey = "event:" + a.event + "|" + a.areaDesc
+      if (seen["id:" + a.id] || seen[sameKey]) return
+      seen["id:" + a.id] = true
+      seen[sameKey] = true
       out.push(a)
     })
   })

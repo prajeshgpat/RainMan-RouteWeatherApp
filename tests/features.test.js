@@ -52,6 +52,11 @@ test("mergeAlerts de-duplicates by id, filters severity, sorts worst first", () 
   assert.deepStrictEqual(f.mergeAlerts([]), [])
 })
 
+test("mergeAlerts drops a repeat of the same event for the same area under another id", () => {
+  const wind = (id) => ({ id, properties: { severity: "Moderate", event: "Wind Advisory", areaDesc: "Kern County Mountains" } })
+  assert.deepStrictEqual(f.mergeAlerts([{ features: [wind("a")] }, { features: [wind("b")] }]).map((x) => x.id), ["a"])
+})
+
 test("truncateText shortens long area lists", () => {
   assert.strictEqual(f.truncateText("short", 20), "short")
   const t = f.truncateText("Alameda; Contra Costa; Marin; Napa; Solano", 20)
