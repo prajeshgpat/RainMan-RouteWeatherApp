@@ -1,8 +1,15 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover"
+    />
+    <meta
+      name="description"
+      content="RainMan shows the weather along your road trip route and the best time to leave to avoid rain and storms."
+    />
 
     <title>RainMan</title>
 
@@ -32,12 +39,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Noto+Serif:wght@700&family=Roboto:wght@100;300;400;900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap"
       rel="stylesheet"
     />
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     />
     <link rel="stylesheet" href="styles.css" />
   </head>
@@ -48,27 +55,79 @@
         <i class="fa-solid fa-umbrella"></i>
       </div>
     </nav>
-    <div id="search-container">
-      <input id="search-input" type="text" placeholder="Enter starting point..." />
-    </div>
-    <div id="destination-container">
-      <input id="destination-input" type="text" placeholder="Enter destination..." />
-    </div>
-    <div id="button-container">
-      <button id="clear-button">Clear</button>
-      <button id="current-location-button">Current Location</button>
-    </div>
-    <div id="weather-info-window" class="weather-info-window">
-      <div class="weather-info-content">
-        <h3 id="weather-info-location"></h3>
-        <p id="weather-info-conditions"></p>
-        <p id="weather-info-temperature"></p>
-        <img id="weather-info-icon" src="" alt="Icon" />
-      </div>
-    </div>
-    <div id="map-container">
+    <main id="map-container">
       <div id="map"></div>
-    </div>
+
+      <div class="overlay">
+        <div id="route-card" role="search">
+          <div class="route-fields">
+            <div class="route-inputs">
+              <input
+                id="search-input"
+                type="text"
+                placeholder="Enter starting point..."
+                aria-label="Starting point"
+                autocomplete="off"
+              />
+              <input
+                id="destination-input"
+                type="text"
+                placeholder="Enter destination..."
+                aria-label="Destination"
+                autocomplete="off"
+              />
+            </div>
+            <button
+              id="swap-button"
+              type="button"
+              aria-label="Swap start and destination"
+              title="Swap start and destination"
+            >
+              &#8645;
+            </button>
+          </div>
+          <div class="route-actions">
+            <button id="current-location-button" type="button">Current Location</button>
+            <button id="clear-button" type="button">Clear</button>
+          </div>
+        </div>
+        <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+      </div>
+
+      <div id="weather-info-window" class="weather-info-window" role="dialog" aria-label="Weather details" hidden>
+        <img id="weather-info-icon" src="" alt="" />
+        <div class="weather-info-text">
+          <h3 id="weather-info-location"></h3>
+          <p id="weather-info-summary"></p>
+          <p id="weather-info-extra" class="muted"></p>
+        </div>
+        <button id="weather-info-close" type="button" aria-label="Close weather details">&times;</button>
+      </div>
+    </main>
+
+    <section id="time-bar" aria-label="Best time to leave" hidden>
+      <div class="tb-header">
+        <div class="tb-heading">
+          <div id="tb-title" class="tb-title"></div>
+          <div id="tb-sub" class="tb-sub"></div>
+        </div>
+        <div id="tb-spinner" class="tb-updating" hidden>
+          <span class="spinner" aria-hidden="true"></span>Updating forecast…
+        </div>
+      </div>
+      <div id="tb-scroll" class="tb-scroll">
+        <div id="tb-segments" class="tb-segments" role="group" aria-label="Departure hours"></div>
+      </div>
+      <ul class="tb-legend" aria-label="Legend">
+        <li><span class="swatch good"></span>Good</li>
+        <li><span class="swatch okay"></span>Okay</li>
+        <li><span class="swatch bad"></span>Bad</li>
+        <li class="tb-legend-note"><span class="tb-star" aria-hidden="true">★</span> Best window</li>
+      </ul>
+    </section>
+
+    <script src="scoring.js"></script>
+    <script src="timebar.js"></script>
     <script src="script.js"></script>
     <script
       async

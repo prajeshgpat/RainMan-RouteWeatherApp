@@ -1,334 +1,511 @@
-html, body, h1 {
-    margin: 0;
-    padding: 0;
+:root {
+  --blue: #166aea;
+  --blue-hover: #3283ff;
+  --ink: #0b1f3a;
+  --muted: #5b6573;
+  --good: #2e9e5b;
+  --okay: #e8b923;
+  --bad: #d64545;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg, #F6F0EA, #eac0a2);
+  font-family: "Roboto", Arial, sans-serif;
+  color: var(--ink);
+  background: #fff;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
 }
 
-/* Set the height and width of the map container */
+/* Navbar */
 .navbar {
+  flex: none;
   background: #fff;
-  padding-bottom: 5px;
-  padding-left: 10px;
-  padding-top: 10px;
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
+  padding: 10px 10px 5px;
   display: flex;
   align-items: center;
-  z-index: 3; /* Ensure the nav bar is displayed above other elements */
-}
-.arrow-container {
-  padding-bottom: 5px;
-  padding-left: 5px;
-  color: #166aea;
-  font-size: 20px;
-  justify-content: left;
-}
-.fa-arrow-left-long {
-  display: inline-block;
-  font-size: 20px;
-  color: #166aea;
-  padding: 8px;
-  background-color: #f2f2f2;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  text-decoration: none;
-}
-.fa-arrow-left-long:hover {
-  background-color: #d9d9d9;
-  transform: translateY(1px);
+  z-index: 3;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
 }
 
 .title {
-  font-family: 'Roboto', sans-serif;
   font-weight: 900;
   font-size: 24px;
-  color: #166aea;
-  margin-top: 10px;
+  color: var(--blue);
   margin-left: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex:1;
+  flex: 1;
 }
 
 .icon-container {
-  padding: 5px;
-  padding-bottom: 5px;
-  padding-right: 10px;
-  margin-top: 10px;
+  padding: 5px 10px 5px 5px;
   margin-right: 10px;
-  color: #166aea;
+  color: var(--blue);
   font-size: 20px;
 }
-.heading {
-  text-align: center;
-  margin-top: 50px;
-  display: flex; /* Use flexbox for centering */
-  flex-direction: column; /* Stack elements vertically */
-  align-items: center; /* Center elements horizontally */
-}
 
-h1 {
-  font-family: 'Noto Serif', serif;
-  font-weight: 700;
-  font-size: 30px;
-  color: rgb(1, 33, 32);
-  margin-bottom: 20px;
-  margin-top: 10px;
-}
-h2 {
-  font-family: 'Roboto', sans-serif;
-  font-weight: 400;
-  font-size: 15px;
-  color: rgb(1, 33, 32);
-  margin-bottom: 20px;
-  margin-left: 50px;
-  margin-right: 50px;
-}
-
-.btn {
-  display: inline-block;
-  padding: 12px 24px;
-  background-color: #10866c;
-  color: #FFF;
-  text-decoration: none;
-  border-radius: 30px;
-  font-size: 18px;
-  font-family: 'Roboto', sans-serif;
-  font-weight: 400;
-  transition: transform 0.3s ease;
-}
-.btn:hover {
-  background-color: #0b6049;
-  transform: translateY(-5px);
-}
-
-.btn-slide-up {
-  animation: slide-up 0.8s ease forwards;
-}
-
-/* Add styling for the bordered image */
-.bordered-image {
-  border: 7px solid #FFF;
-  border-radius: 30px; /* Add border-radius for rounded corners (optional) */
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3); /* Add a box shadow for a visual effect (optional) */
-  max-width: 50%; /* Ensure the image doesn't exceed its container's width */
-  margin-top: 30px;
-  width: 50%;
-}
-
-/* Optional: Adjust the max-width of the image for responsiveness */
-@media screen and (max-width: 768px) {
-  .bordered-image {
-    max-width: 70%; /* Adjust as needed */
-  }
-}
-
-
-/* Map App CSS */
-/* Set the width of the search input field and buttons */
-#search-container {
-  position: absolute; /* Use absolute positioning to place the search container over the map */
-  top: 75px; /* Adjust the top position as needed to create space below the navigation bar */
-  left: 50%;
-  transform: translateX(-50%); /* Center the search container horizontally */
-  display: flex; /* Display the search container and buttons in a row */
-  align-items: center; /* Align items vertically center */
-  justify-content: center; /* Align items horizontally center */
-  max-width: 100%;
-  z-index: 2; /* Ensure the search container and buttons are displayed above the map */
-}
-
-/* Set the width of the search input field and buttons */
-#destination-container {
-  position: absolute; /* Use absolute positioning to place the search container over the map */
-  top: 115px; /* Adjust the top position as needed to create space below the navigation bar */
-  left: 50%;
-  transform: translateX(-50%); /* Center the search container horizontally */
-  display: flex; /* Display the search container and buttons in a row */
-  align-items: center; /* Align items vertically center */
-  justify-content: center; /* Align items horizontally center */
-  max-width: 100%;
-  z-index: 2; /* Ensure the search container and buttons are displayed above the map */
-}
-
-/* Set the width of the search input field and buttons */
-#button-container {
-  position: absolute; /* Use absolute positioning to place the search container over the map */
-  top: 150px; /* Adjust the top position as needed to create space below the navigation bar */
-  left: 50%;
-  transform: translateX(-50%); /* Center the search container horizontally */
-  display: flex; /* Display the search container and buttons in a row */
-  align-items: center; /* Align items vertically center */
-  justify-content: center; /* Align items horizontally center */
-  max-width: 100%;
-  z-index: 2; /* Ensure the search container and buttons are displayed above the map */
-}
-
-#search-input {
-  padding-left: 15px;
-  font-size: 14px;
-  font-family: 'Roboto', sans-serif;
-  font-weight: 400;
-  height: 30px; /* Adjust the height as needed */
-  margin-right: 1px;
-  border-radius: 39px; /* Set the border-radius to half of the height to make it rounded */
-  max-width: 100%;
-  width: 400px;
-  flex: 1; /* Allow the search input to take available space */
-  border: none;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-#destination-input {
-  padding-left: 15px;
-  font-size: 14px;
-  font-family: 'Roboto', sans-serif;
-  font-weight: 400;
-  height: 30px; /* Adjust the height as needed */
-  margin-right: 1px;
-  border-radius: 39px; /* Set the border-radius to half of the height to make it rounded */
-  max-width: 100%;
-  width: 400px;
-  flex: 1; /* Allow the search input to take available space */
-  border: none;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-/* Position the buttons below the search bar */
-#clear-button,
-#current-location-button {
-  font-size: 14px;
-  font-family: 'Roboto', sans-serif;
-  font-weight: 400;
-  padding: 5px 10px;
-  background-color: #166aea;
-  color: white;
-  border: none;
-  border-radius: 39px;
-  cursor: pointer;
-  margin-top: 5px; /* Add margin to separate buttons from the search bar */
-  margin-inline: 2px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-#clear-button:hover,
-#current-location-button:hover {
-  background-color: #3283ff;
-}
-
-/* Adjust margin to move the map container below the search container */
+/* Map fills everything between the navbar and the time bar */
 #map-container {
-  /* Set the height to fill the remaining viewport space below the search container */
-  height: 96vh; /* Subtract the height of the navigation bar and search container from the full viewport height */
-  margin-top: 32px; /* Add a margin to create space for the navigation bar and search container */
-  width: 100%;
-  position: absolute; /* Add this to make the weather info window relative to this container */
-  z-index: 0;
+  flex: 1;
+  min-height: 0;
+  position: relative;
 }
 
 #map {
-  width: 100%;
-  height: 100%; /* Make the map fill the entire container */
-  margin: 0;
-  padding: 0;
-  overflow: hidden; /* Hide any overflowing content, including the weather info window */
-  position: absolute; /* Make the map container position relative for absolute positioning of weather info */
-}
-
-.weather-info-container {
-  height: 96vh; /* Subtract the height of the navigation bar and search container from the full viewport height */
-  margin-top: 32px;
-  width: 100%;
   position: absolute;
-  bottom: 0px; /* Adjust the distance from the bottom as needed */
-  left: 50%;
-  background-color: #c1c1c1;
-  width: 90%;
-  max-width: 400px;
-  padding: 10px;
-  display: none;
-  opacity: 0;
-  z-index: 10;
+  inset: 0;
 }
 
-.weather-info-window.active .weather-info-content{
+/* Floating route card + toast */
+.overlay {
+  position: absolute;
+  top: 10px;
+  left: 0;
+  right: 0;
   display: flex;
-  opacity: 1;
-  z-index: 10;
-  animation: slide-up 0.8s ease forwards;
-}
-
-.weather-info-content {
-  padding: 10px;
-  width: 400px;
-  margin-top: 450px;
-  background-color: #ffffff;
-  border-radius: 39px;
-  text-align: center;
+  flex-direction: column;
   align-items: center;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-  z-index: 10;
-  transform: translateY(20px);
-  opacity: 0.5;
+  gap: 8px;
+  padding: 0 12px;
+  pointer-events: none;
+  z-index: 2;
 }
 
-.weather-info-content img {
-  width: 50px;
-  height: 50px;
-  margin-top: 5px;
+.overlay > * {
+  pointer-events: auto;
 }
 
-.weather-info-content h3 {
+#route-card {
+  width: 100%;
+  max-width: 420px;
+  box-sizing: border-box;
+  background: #fff;
+  border-radius: 16px;
+  padding: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.route-fields {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.route-inputs {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#search-input,
+#destination-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 36px;
+  padding: 0 15px;
+  font-size: 14px;
+  font-family: "Roboto", sans-serif;
+  color: var(--ink);
+  background: #f3f5f8;
+  border: 1px solid #d5dbe3;
+  border-radius: 18px;
+}
+
+#search-input:focus,
+#destination-input:focus {
+  outline: 2px solid var(--blue);
+  outline-offset: 0;
+  background: #fff;
+}
+
+#swap-button {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #d5dbe3;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--blue);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+#swap-button:hover {
+  background: #eef4ff;
+}
+
+.route-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+#clear-button,
+#current-location-button {
+  flex: 1;
+  font-size: 14px;
+  font-family: "Roboto", sans-serif;
+  padding: 7px 10px;
+  background-color: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 18px;
+  cursor: pointer;
+}
+
+#clear-button {
+  flex: none;
+  background: #fff;
+  color: var(--blue);
+  border: 1px solid var(--blue);
+}
+
+#current-location-button:hover {
+  background-color: var(--blue-hover);
+}
+
+#clear-button:hover {
+  background: #eef4ff;
+}
+
+button:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+}
+
+/* Toast */
+.toast {
+  max-width: 420px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border-radius: 12px;
+  background: #fff;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.35;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+
+.toast.error {
+  background: #fdecec;
+  color: #8a1f1f;
+  border-left: 4px solid var(--bad);
+}
+
+.toast.info {
+  border-left: 4px solid var(--blue);
+}
+
+.spinner {
+  flex: none;
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 6px;
+  border: 2px solid #c5cdd8;
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.toast .spinner {
+  margin-right: 0;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Weather info bottom sheet, sits at the bottom of the map just above the time bar */
+.weather-info-window {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  width: calc(100% - 24px);
+  max-width: 420px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 44px 10px 12px;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+  z-index: 2;
+}
+
+.weather-info-window.active {
+  animation: slide-up 0.4s ease;
+}
+
+.weather-info-window img {
+  flex: none;
+  width: 56px;
+  height: 56px;
+}
+
+.weather-info-text {
+  min-width: 0;
+}
+
+.weather-info-text h3 {
   margin: 0;
+  font-size: 16px;
 }
 
-.weather-info-content p {
-  margin: 5px 0;
+.weather-info-text p {
+  margin: 3px 0 0;
+  font-size: 14px;
 }
 
-.weather-info-icon {
-  width: 50px;
-  height: 50px;
+.weather-info-text .muted {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+#weather-info-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: #eef1f5;
+  color: var(--ink);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
 }
 
 @keyframes slide-up {
   from {
-    transform: translateY(20px); /* Start position of the content */
-    opacity: 0.5; /* Start with opacity 0.5 to make it fade in */
+    transform: translate(-50%, 20px);
+    opacity: 0.5;
   }
   to {
-    transform: translateY(0); /* End position of the content (slid up) */
-    opacity: 1; /* Fully visible */
+    transform: translate(-50%, 0);
+    opacity: 1;
   }
 }
 
-/* Apply the styles below 700px screen width */
+/* Departure time bar */
+#time-bar {
+  flex: none;
+  position: relative;
+  z-index: 3;
+  background: #fff;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.2);
+  padding: 10px 12px calc(8px + env(safe-area-inset-bottom));
+}
+
+.tb-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.tb-title {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.tb-sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.tb-sub:empty {
+  display: none;
+}
+
+.tb-updating {
+  flex: none;
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.tb-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  margin: 8px -12px 0;
+  padding: 8px 12px 2px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tb-segments {
+  display: flex;
+  gap: 2px;
+  min-width: min-content;
+}
+
+.tb-seg {
+  flex: 1 0 38px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.tb-block {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 15px;
+  background: var(--muted);
+  transition: transform 0.12s ease;
+}
+
+.tb-seg.good .tb-block {
+  background: var(--good);
+}
+
+.tb-seg.okay .tb-block {
+  background: var(--okay);
+  color: var(--ink);
+}
+
+.tb-seg.bad .tb-block {
+  background: var(--bad);
+}
+
+.tb-label {
+  height: 16px;
+  margin-top: 3px;
+  font-size: 11px;
+  white-space: nowrap;
+  text-align: center;
+  color: var(--muted);
+}
+
+/* Day separator at midnight */
+.tb-seg.day-start {
+  margin-left: 6px;
+}
+
+.tb-seg.day-start::after {
+  content: "";
+  position: absolute;
+  left: -4px;
+  top: -4px;
+  bottom: 0;
+  border-left: 2px dashed #9aa5b4;
+}
+
+.tb-seg.day-start .tb-label {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* Best window: a dark rail above the segments */
+.tb-seg.best::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  right: -1px;
+  top: -7px;
+  height: 4px;
+  background: var(--ink);
+}
+
+.tb-seg.best-first::before {
+  left: 0;
+  border-radius: 2px 0 0 2px;
+}
+
+.tb-seg.best-last::before {
+  right: 0;
+  border-radius: 0 2px 2px 0;
+}
+
+/* Selected departure: raised and outlined */
+.tb-seg.selected .tb-block {
+  transform: translateY(-3px);
+  outline: 3px solid var(--ink);
+  outline-offset: 0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.35);
+}
+
+.tb-seg.selected .tb-label {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.tb-legend {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 6px 0 0;
+  padding: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.tb-legend li {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+}
+
+.swatch.good {
+  background: var(--good);
+}
+
+.swatch.okay {
+  background: var(--okay);
+}
+
+.swatch.bad {
+  background: var(--bad);
+}
+
 @media screen and (max-width: 700px) {
-  #search-input {
-    width: 250px; /* Set the width to 200px for screen width below 700px */
-  }
-  #destination-input {
-    width: 250px; /* Set the width to 200px for screen width below 700px */
-  }
-  #current-location-button {
-    width: 130px;
-  }
-  .weather-info-content {
-    width: 250px;
-  }
-  .weather-info-container {
-    width: 250px;
+  .tb-title {
+    font-size: 14px;
   }
 }
