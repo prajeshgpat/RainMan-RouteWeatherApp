@@ -306,6 +306,10 @@ if (typeof module !== "undefined") {
     geoCachePut: geoCachePut,
     geoCachePrune: geoCachePrune,
     loadForecasts: loadForecasts,
+    roundTo: roundTo,
+    storageGet: storageGet,
+    storageSet: storageSet,
+    HOUR_MS: HOUR_MS,
     weatherIconName: weatherIconName,
   }
 }
