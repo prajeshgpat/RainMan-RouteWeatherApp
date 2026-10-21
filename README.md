@@ -19,6 +19,21 @@ Scoring lives in `public/scoring.js`, the Open-Meteo request/normalizer, cache h
 `public/weather.js`, the map marker SVGs in `public/markers.js` (all pure JS, no DOM or Google dependencies) and
 the bar rendering in `public/timebar.js`.
 
+## More features
+
+- **Night shading**: departures that start after dark get a stripe under their time bar segment.
+- **Severe weather alerts** (US only): up to 8 points along the route are checked against
+  [api.weather.gov](https://www.weather.gov/documentation/services-web-api) (cached 15 min in `sessionStorage`).
+  Moderate, Severe and Extreme alerts show in a dismissible banner.
+- **Alternative routes**: up to 3 Google routes are scored in the same single Open-Meteo request. Route chips switch
+  between them, and a hint appears when a drier route is within 15 minutes of the fastest.
+- **Shareable links**: the URL keeps `?from=&to=&leave=` in sync; the Share button copies or shares it.
+- **Rain radar** toggle using [RainViewer](https://www.rainviewer.com/) tiles (shown when zoomed out).
+- **F/C toggle**, **recent trips** (last 5, in `localStorage`), **dark mode** (follows the system setting) and an
+  **installable PWA** (`manifest.webmanifest`, `sw.js` app-shell cache; weather and map requests are never cached).
+- **Marker decluttering**: when zoomed out, overlapping weather markers are hidden (open one first, then the worst
+  conditions, then evenly spread), at least 56 px apart.
+
 ## Keeping API calls low
 
 - Weather: one Open-Meteo request per route (chunked at 150 points). Forecasts are cached in `localStorage` per
@@ -32,6 +47,7 @@ the bar rendering in `public/timebar.js`.
 
 - Weather data by [Open-Meteo.com](https://open-meteo.com/), licensed
   [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Used under the free non-commercial terms.
+- Rain radar: [RainViewer](https://www.rainviewer.com/). Severe weather alerts: US National Weather Service.
 - Weather icons: [Meteocons](https://github.com/basmilius/weather-icons) by Bas Milius, MIT license
   (see `public/icons/LICENSE`).
 
