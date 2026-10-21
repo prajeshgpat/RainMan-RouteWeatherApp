@@ -330,6 +330,18 @@ button:focus-visible {
   gap: 10px;
 }
 
+.tb-icon {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  margin: -4px 0 -4px -4px;
+}
+
+.tb-heading {
+  flex: 1;
+  min-width: 0;
+}
+
 .tb-title {
   font-size: 15px;
   font-weight: 700;
@@ -484,6 +496,16 @@ button:focus-visible {
   display: flex;
   align-items: center;
   gap: 5px;
+}
+
+.tb-credit {
+  margin: 6px 0 0;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.tb-credit a {
+  color: inherit;
 }
 
 .swatch {

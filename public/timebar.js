@@ -49,6 +49,15 @@ function tbSubtitle(model) {
   return when + ": " + TB_CLASS_LABEL[dep.cls] + " — " + tbDescribe(model, dep)
 }
 
+// Icon for the best window: the worst condition met when leaving at its first hour
+function tbIconName(model) {
+  var deps = model.departures || []
+  if (model.note || !model.best || typeof weatherIconName !== "function") return null
+  var dep = deps[model.best.start]
+  if (!dep || !dep.worst) return null
+  return weatherIconName(dep.worst.code, dep.worst.isDay, dep.worst.wind)
+}
+
 function renderTimeBar(model, onSelect) {
   var bar = document.getElementById("time-bar")
   if (!bar) return
@@ -59,6 +68,13 @@ function renderTimeBar(model, onSelect) {
   bar.hidden = false
   document.getElementById("tb-title").textContent = tbTitle(model)
   document.getElementById("tb-sub").textContent = tbSubtitle(model)
+  var iconName = tbIconName(model)
+  var iconEl = document.getElementById("tb-icon")
+  iconEl.hidden = !iconName
+  if (iconName) {
+    iconEl.src = "icons/" + iconName + ".svg"
+    iconEl.alt = ""
+  }
   document.getElementById("tb-spinner").hidden = !model.loading
   bar.setAttribute("aria-busy", model.loading ? "true" : "false")
 

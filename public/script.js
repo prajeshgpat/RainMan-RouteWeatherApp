@@ -1,4 +1,3 @@
-var OWM_API_KEY = "3c92bd511fa74129ae88ca53365441be"
 var SAMPLE_STEP_METERS = 25 * 1609.34 // a weather sample about every 25 miles
 var MAX_SAMPLES = 60
 var MIN_END_GAP_METERS = 3 * 1609.34 // drop an intermediate sample this close to the destination
@@ -16,6 +15,15 @@ var destSel = null
 var startMarker = null
 var userMarker = null
 var userLatLng = null
+var routeEndMarkers = [] // custom start/end pins for the drawn route
+
+// Weather icon SVG text by icon name, preloaded so marker data URIs can embed them
+var iconTextCache = {}
+var iconsReady = null
+// Reverse-geocoded place names by geoKey (also persisted in localStorage)
+var placeCache = {}
+var placePending = {}
+var store = null // localStorage, or null when unavailable
 
 // Per-route state, all reset by resetRoute()
 var requestId = 0 // incremented for every route search/reset; stale async results are ignored
@@ -31,7 +39,10 @@ var toastTimer = null
 
 function initMap() {
   directionsService = new google.maps.DirectionsService()
-  directionsDisplay = new google.maps.DirectionsRenderer()
+  directionsDisplay = new google.maps.DirectionsRenderer({ suppressMarkers: true })
+  store = getStore()
+  wxCachePrune(store, Date.now())
+  iconsReady = loadIcons()
   map = new google.maps.Map(document.getElementById("map"), {
     zoom: 13,
     center: FALLBACK_LATLNG,
@@ -45,8 +56,9 @@ function initMap() {
 
   startInput = document.getElementById("search-input")
   destinationInput = document.getElementById("destination-input")
-  var searchBox = new google.maps.places.SearchBox(startInput)
-  var destinationSearchBox = new google.maps.places.SearchBox(destinationInput)
+  var autocompleteOptions = { fields: ["geometry", "name", "formatted_address"] }
+  var startAutocomplete = new google.maps.places.Autocomplete(startInput, autocompleteOptions)
+  var destinationAutocomplete = new google.maps.places.Autocomplete(destinationInput, autocompleteOptions)
 
   document.getElementById("clear-button").addEventListener("click", clearAll)
   document.getElementById("swap-button").addEventListener("click", swapEndpoints)
@@ -59,9 +71,15 @@ function initMap() {
   // Registered once: clicking the map hides the weather popup
   map.addListener("click", hidePopup)
 
-  searchBox.addListener("places_changed", function () {
-    var place = firstPlaceWithLocation(searchBox.getPlaces())
-    if (!place) return
+  startAutocomplete.addListener("place_changed", function () {
+    var place = startAutocomplete.getPlace()
+    if (!placeLocation(place)) {
+      // Enter on typed text: route using the text as an address (see resolveEndpoint)
+      if (!startInput.value.trim()) return
+      startSel = null
+      computeRoute()
+      return
+    }
     startSel = { text: startInput.value, loc: place.geometry.location, source: "user" }
     syncStartMarker()
     if (!routeShown) {
@@ -71,9 +89,14 @@ function initMap() {
     computeRoute()
   })
 
-  destinationSearchBox.addListener("places_changed", function () {
-    var place = firstPlaceWithLocation(destinationSearchBox.getPlaces())
-    if (!place) return
+  destinationAutocomplete.addListener("place_changed", function () {
+    var place = destinationAutocomplete.getPlace()
+    if (!placeLocation(place)) {
+      if (!destinationInput.value.trim()) return
+      destSel = null
+      computeRoute()
+      return
+    }
     destSel = { text: destinationInput.value, loc: place.geometry.location, source: "user" }
     if (!resolveEndpoint(startSel, startInput)) {
       map.panTo(place.geometry.location)
@@ -90,14 +113,16 @@ function initMap() {
   }
 }
 
-function firstPlaceWithLocation(places) {
-  if (!places || places.length === 0) return null
-  var place = places[0]
-  if (!place.geometry || !place.geometry.location) {
-    showToast("Couldn't find that place. Pick one of the suggestions.", { kind: "error" })
+function placeLocation(place) {
+  return place && place.geometry && place.geometry.location ? place.geometry.location : null
+}
+
+function getStore() {
+  try {
+    return window.localStorage
+  } catch (e) {
     return null
   }
-  return place
 }
 
 // A selected place if the input still matches it, otherwise whatever the user typed (as an address)
@@ -148,6 +173,10 @@ function resetRoute() {
   samples.forEach(function (s) {
     if (s.marker) s.marker.setMap(null)
   })
+  routeEndMarkers.forEach(function (m) {
+    m.setMap(null)
+  })
+  routeEndMarkers = []
   samples = []
   departures = []
   bestRange = null
@@ -190,25 +219,15 @@ function computeRoute() {
       var path = result.routes[0].overview_path
       var tripHours = leg.duration.value / 3600
       samples = buildSamples(path, tripHours)
+      drawEndpointPins(leg)
 
       barLoading = true
       updateBar()
       showToast("Loading weather along your route…", { kind: "loading", sticky: true })
 
-      Promise.all(
-        samples.map(function (s) {
-          return fetchHourly(s.latLng)
-            .then(function (hourly) {
-              s.hourly = hourly
-            })
-            .catch(function (error) {
-              console.error("Weather fetch failed:", error)
-              s.failed = true
-            })
-        })
-      ).then(function () {
+      loadWeather(samples).then(function () {
         if (myRequest !== requestId) return
-        onWeatherLoaded(tripHours, myRequest)
+        onWeatherLoaded(tripHours)
       })
     }
   )
@@ -250,27 +269,30 @@ function buildSamples(path, tripHours) {
   })
 }
 
-function fetchHourly(latLng) {
-  var exclude = "current,minutely,daily,alerts"
-  var url =
-    "https://api.openweathermap.org/data/3.0/onecall?lat=" + latLng.lat() +
-    "&lon=" + latLng.lng() +
-    "&exclude=" + exclude +
-    "&units=imperial&appid=" + OWM_API_KEY
-  return fetch(url)
-    .then(function (response) {
-      if (!response.ok) throw new Error("OpenWeather returned HTTP " + response.status)
-      return response.json()
+// Attach hourly forecasts to samples with one batched, cached Open-Meteo request.
+// Takes any list of samples (phase B passes the samples of several routes at once).
+function loadWeather(list) {
+  var points = list.map(function (s) {
+    return { lat: s.latLng.lat(), lng: s.latLng.lng() }
+  })
+  var env = {
+    fetch: function (url) {
+      return fetch(url)
+    },
+    storage: store,
+    now: function () {
+      return Date.now()
+    },
+  }
+  return loadForecasts(points, env).then(function (results) {
+    list.forEach(function (s, i) {
+      if (results[i]) s.hourly = results[i]
+      else s.failed = true
     })
-    .then(function (data) {
-      if (!data || !Array.isArray(data.hourly) || data.hourly.length === 0) {
-        throw new Error((data && data.message) || "No hourly forecast in response")
-      }
-      return data.hourly
-    })
+  })
 }
 
-function onWeatherLoaded(tripHours, myRequest) {
+function onWeatherLoaded(tripHours) {
   barLoading = false
   var withData = samples.filter(function (s) {
     return s.hourly
@@ -281,7 +303,13 @@ function onWeatherLoaded(tripHours, myRequest) {
     return
   }
 
-  maxD = maxDepartureOffset(tripHours)
+  var hourlyLen = Math.min.apply(
+    null,
+    withData.map(function (s) {
+      return s.hourly.length
+    })
+  )
+  maxD = maxDepartureOffset(tripHours, hourlyLen)
   selectedD = 0
   var failed = samples.length - withData.length
   if (maxD < 0) {
@@ -290,7 +318,7 @@ function onWeatherLoaded(tripHours, myRequest) {
     renderTimeBar({ hidden: true })
     showToast(
       "This trip takes about " + Math.round(tripHours) +
-        " hours, longer than the 48-hour forecast, so departure times can't be compared. Stops near the end show the last available forecast.",
+        " hours, longer than the available forecast, so departure times can't be compared. Stops near the end show the last available forecast.",
       { kind: "error", sticky: true }
     )
   } else {
@@ -308,7 +336,7 @@ function onWeatherLoaded(tripHours, myRequest) {
     }
   }
   paintMarkers()
-  fillPlaces(myRequest)
+  ensureWorstPlace()
 }
 
 function updateBar() {
@@ -331,31 +359,92 @@ function selectDeparture(d) {
   updateBar()
   paintMarkers()
   if (openSampleIndex >= 0) showPopup(openSampleIndex)
+  ensureWorstPlace()
+}
+
+// ---- Icons and markers ----
+
+function loadIcons() {
+  return Promise.all(
+    WEATHER_ICONS.map(function (name) {
+      return fetch("icons/" + name + ".svg")
+        .then(function (response) {
+          return response.ok ? response.text() : ""
+        })
+        .catch(function () {
+          return ""
+        })
+        .then(function (text) {
+          iconTextCache[name] = text
+        })
+    })
+  )
+}
+
+function entryIconName(entry) {
+  return weatherIconName(entry.code, entry.isDay, entry.wind)
+}
+
+function weatherMarkerIcon(entry, selected) {
+  var cls = classify(hourBadness(entry))
+  var svg = markerSvg({
+    iconSvgText: iconTextCache[entryIconName(entry)],
+    cls: cls,
+    temp: entry.temp == null ? null : Math.round(entry.temp),
+    selected: selected,
+  })
+  var g = markerGeometry(selected)
+  return {
+    url: svgDataUri(svg),
+    scaledSize: new google.maps.Size(g.width, g.height),
+    anchor: new google.maps.Point(g.cx, g.cy),
+  }
+}
+
+function pinIcon(kind) {
+  var g = pinGeometry()
+  return {
+    url: svgDataUri(pinSvg(kind)),
+    scaledSize: new google.maps.Size(g.width, g.height),
+    anchor: new google.maps.Point(g.cx, g.cy),
+  }
+}
+
+function drawEndpointPins(leg) {
+  routeEndMarkers = [
+    new google.maps.Marker({ position: leg.start_location, map: map, icon: pinIcon("start"), title: "Start", zIndex: 5 }),
+    new google.maps.Marker({ position: leg.end_location, map: map, icon: pinIcon("end"), title: "Destination", zIndex: 5 }),
+  ]
 }
 
 // Create or update the weather marker of every sample for the selected departure
 function paintMarkers() {
-  samples.forEach(function (s, index) {
-    var entry = entryFor(s, selectedD)
-    if (!entry) {
-      if (s.marker) {
-        s.marker.setMap(null)
-        s.marker = null
+  var ready = iconsReady || Promise.resolve()
+  var myRequest = requestId
+  ready.then(function () {
+    if (myRequest !== requestId) return
+    samples.forEach(function (s, index) {
+      var entry = entryFor(s, selectedD)
+      if (!entry) {
+        if (s.marker) {
+          s.marker.setMap(null)
+          s.marker = null
+        }
+        return
       }
-      return
-    }
-    var icon = {
-      url: "https://openweathermap.org/img/wn/" + entry.weather[0].icon + ".png",
-      scaledSize: new google.maps.Size(50, 50),
-    }
-    if (s.marker) {
-      s.marker.setIcon(icon)
-    } else {
-      s.marker = new google.maps.Marker({ position: s.latLng, map: map, icon: icon })
-      s.marker.addListener("click", function () {
-        showPopup(index)
-      })
-    }
+      var selected = index === openSampleIndex
+      var icon = weatherMarkerIcon(entry, selected)
+      if (s.marker) {
+        if (s.markerUrl !== icon.url) s.marker.setIcon(icon)
+        s.marker.setZIndex(selected ? 4 : 1)
+      } else {
+        s.marker = new google.maps.Marker({ position: s.latLng, map: map, icon: icon, zIndex: selected ? 4 : 1 })
+        s.marker.addListener("click", function () {
+          showPopup(index)
+        })
+      }
+      s.markerUrl = icon.url
+    })
   })
 }
 
@@ -373,17 +462,21 @@ function showPopup(index) {
   var s = samples[index]
   var entry = s && entryFor(s, selectedD)
   if (!entry) return
+  var previous = openSampleIndex
   openSampleIndex = index
-  var w = entry.weather[0]
-  var condition = w.description.replace(/\b\w/g, function (c) {
+  var condition = entryDescription(entry).replace(/^\w/, function (c) {
     return c.toUpperCase()
   })
+  var temp = entry.temp == null ? "" : " · " + Math.round(entry.temp) + "°F"
   document.getElementById("weather-info-summary").textContent =
-    "Arrive ~" + formatClock(arrivalMs(s)) + " · " + condition + " · " + Math.round(entry.temp) + "°F"
+    "Arrive ~" + formatClock(arrivalMs(s)) + " · " + condition + temp
+  var wind = Math.round(entry.wind || 0)
+  var gust = Math.round(entry.gust || 0)
   document.getElementById("weather-info-extra").textContent =
-    "Rain chance " + Math.round((entry.pop || 0) * 100) + "% · Wind " + Math.round(entry.wind_speed || 0) + " mph"
+    "Rain chance " + Math.round((entry.pop || 0) * 100) + "% · Wind " + wind + " mph" +
+    (gust > wind + 5 ? " (gusts " + gust + ")" : "")
   var icon = document.getElementById("weather-info-icon")
-  icon.src = "https://openweathermap.org/img/wn/" + w.icon + "@2x.png"
+  icon.src = "icons/" + entryIconName(entry) + ".svg"
   icon.alt = condition
 
   var location = document.getElementById("weather-info-location")
@@ -393,40 +486,79 @@ function showPopup(index) {
   popup.classList.remove("active")
   void popup.offsetWidth // reflow so the animation replays
   popup.classList.add("active")
+  if (previous !== index) paintMarkers()
 
   if (!s.place) {
     var myRequest = requestId
-    reverseGeocodeLatLng(s.latLng.lat(), s.latLng.lng())
-      .then(function (city) {
-        s.place = city
-        if (myRequest === requestId && openSampleIndex === index) location.textContent = city
-      })
-      .catch(function (error) {
-        console.error("Error getting city name:", error)
-      })
+    ensurePlace(index).then(function (city) {
+      if (city && myRequest === requestId && openSampleIndex === index) location.textContent = city
+    })
   }
 }
 
 function hidePopup() {
+  var wasOpen = openSampleIndex >= 0
   openSampleIndex = -1
   var popup = document.getElementById("weather-info-window")
   popup.hidden = true
   popup.classList.remove("active")
+  if (wasOpen) paintMarkers()
 }
 
-// Look up place names one at a time (gentle on the geocoder quota) for the time bar text
-function fillPlaces(myRequest) {
-  var chain = Promise.resolve()
-  samples.forEach(function (s) {
-    chain = chain.then(function () {
-      if (myRequest !== requestId || s.place || !s.hourly) return
-      return reverseGeocodeLatLng(s.latLng.lat(), s.latLng.lng())
-        .then(function (city) {
-          s.place = city
-          if (myRequest === requestId) updateBar()
-        })
-        .catch(function () {})
-    })
+// ---- Place names (reverse geocoding is only done on demand, and cached) ----
+
+function cachedPlace(latLng) {
+  var key = geoKey(latLng.lat(), latLng.lng())
+  if (placeCache[key]) return placeCache[key]
+  var stored = geoCacheGet(store, key)
+  if (stored) placeCache[key] = stored
+  return stored
+}
+
+// Resolve the place name of a sample (from memory, localStorage, then the Geocoder). Results for
+// an older search are dropped. Resolves to the name, or null when unknown.
+function ensurePlace(index) {
+  var s = samples[index]
+  if (!s) return Promise.resolve(null)
+  if (s.place) return Promise.resolve(s.place)
+  var cached = cachedPlace(s.latLng)
+  if (cached) {
+    s.place = cached
+    return Promise.resolve(cached)
+  }
+  var key = geoKey(s.latLng.lat(), s.latLng.lng())
+  var myRequest = requestId
+  if (!placePending[key]) {
+    placePending[key] = reverseGeocodeLatLng(s.latLng.lat(), s.latLng.lng())
+      .then(function (city) {
+        placeCache[key] = city
+        geoCachePut(store, key, city, Date.now())
+        return city
+      })
+      .catch(function (error) {
+        console.error("Error getting city name:", error)
+        return null
+      })
+      .then(function (city) {
+        delete placePending[key]
+        return city
+      })
+  }
+  return placePending[key].then(function (city) {
+    if (city && myRequest === requestId && samples[index] === s) s.place = city
+    return myRequest === requestId ? city : null
+  })
+}
+
+// The time bar subtitle names the worst stop of the selected departure: look up only that one
+function ensureWorstPlace() {
+  var dep = departures[selectedD]
+  if (!dep || !dep.worst) return
+  var myRequest = requestId
+  var index = dep.worst.sampleIndex
+  var had = !!(samples[index] && samples[index].place)
+  ensurePlace(index).then(function (city) {
+    if (city && !had && myRequest === requestId) updateBar()
   })
 }
 

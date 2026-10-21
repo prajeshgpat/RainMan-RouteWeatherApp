@@ -107,6 +107,7 @@
 
     <section id="time-bar" aria-label="Best time to leave" hidden>
       <div class="tb-header">
+        <img id="tb-icon" class="tb-icon" src="" alt="" hidden />
         <div class="tb-heading">
           <div id="tb-title" class="tb-title"></div>
           <div id="tb-sub" class="tb-sub"></div>
@@ -124,9 +125,15 @@
         <li><span class="swatch bad"></span>Bad</li>
         <li class="tb-legend-note"><span class="tb-star" aria-hidden="true">★</span> Best window</li>
       </ul>
+      <p class="tb-credit">
+        Weather data by <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a>
+        (CC BY 4.0) · Icons by <a href="https://github.com/basmilius/weather-icons" target="_blank" rel="noopener">Meteocons</a>
+      </p>
     </section>
 
     <script src="scoring.js"></script>
+    <script src="weather.js"></script>
+    <script src="markers.js"></script>
     <script src="timebar.js"></script>
     <script src="script.js"></script>
     <script

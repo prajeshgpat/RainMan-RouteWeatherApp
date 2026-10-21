@@ -60,6 +60,14 @@ function isNight(entry) {
   return !!entry && entry.isDay === false
 }
 
+// Human description of an hourly entry, e.g. "heavy rain (icy) at night"
+function entryDescription(entry) {
+  var description = conditionDescription(entry.code)
+  if (isIcy(entry)) description += " (icy)"
+  if (isNight(entry)) description += " at night"
+  return description
+}
+
 // Badness of one hourly forecast entry { temp, pop, wind, gust, code, isDay }, 0 (great) to 1 (awful)
 function hourBadness(entry) {
   if (!entry) return 0
@@ -143,13 +151,10 @@ function worstStop(samples, d) {
     if (!entry) continue
     var b = hourBadness(entry)
     if (worst === null || b > worst.badness) {
-      var description = conditionDescription(entry.code)
-      if (isIcy(entry)) description += " (icy)"
-      if (isNight(entry)) description += " at night"
       worst = {
         sampleIndex: i,
         badness: b,
-        description: description,
+        description: entryDescription(entry),
         code: entry.code,
         isDay: entry.isDay !== false,
         wind: Number(entry.wind) || 0,
@@ -184,6 +189,7 @@ if (typeof module !== "undefined") {
     conditionBadness: conditionBadness,
     conditionDescription: conditionDescription,
     isIcy: isIcy,
+    entryDescription: entryDescription,
     hourBadness: hourBadness,
     hourIndex: hourIndex,
     entryFor: entryFor,
