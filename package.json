@@ -1,0 +1,7 @@
+{
+  "name": "rainman-routeweatherapp",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  }
+}
