@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta
+      name="description"
+      content="How often was the drive actually dry when RainMan rated it green? Forecast accuracy by days ahead and by corridor."
+    />
+    <title>RainMan accuracy</title>
+
+    <link rel="icon" type="image/x-icon" href="/images/favicon.png" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/images/favicon_package/favicon-32x32.png"
+    />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1b232e" media="(prefers-color-scheme: dark)" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/accuracy/accuracy.css" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <a class="nav-link" href="/">&larr; Map</a>
+      <div class="title">RainMan</div>
+      <span class="nav-spacer" aria-hidden="true"></span>
+    </nav>
+    <main id="accuracy" class="page" aria-live="polite">
+      <p class="status">Loading accuracy data…</p>
+    </main>
+    <script type="module" src="/src/accuracy/main.ts"></script>
+  </body>
+</html>
