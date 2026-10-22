@@ -1,0 +1,17 @@
+# No secrets here. MotherDuck authenticates through the MOTHERDUCK_TOKEN environment variable
+# (the DuckDB motherduck extension reads motherduck_token / MOTHERDUCK_TOKEN).
+rainman:
+  target: dev
+  outputs:
+    # Local DuckDB file, git-ignored. Run dbt from pipeline/dbt, or set RAINMAN_DEV_DB.
+    dev:
+      type: duckdb
+      path: "{{ env_var('RAINMAN_DEV_DB', '../.data/rainman.duckdb') }}"
+      schema: main
+      threads: 4
+    # MotherDuck database `rainman`
+    prod:
+      type: duckdb
+      path: "{{ env_var('RAINMAN_PROD_DB', 'md:rainman') }}"
+      schema: main
+      threads: 4

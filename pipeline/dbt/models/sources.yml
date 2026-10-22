@@ -1,0 +1,28 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    description: Raw Open-Meteo Previous Runs responses written by the Dagster `raw_previous_runs` asset.
+    tables:
+      - name: previous_runs
+        description: >
+          One row per (requested lat, lng, date window). `response` is the Open-Meteo JSON for that
+          single location, kept verbatim so the whole pipeline can be replayed from it.
+        columns:
+          - name: lat
+            description: Requested latitude (a corridor point).
+            data_tests: [not_null]
+          - name: lng
+            description: Requested longitude (a corridor point).
+            data_tests: [not_null]
+          - name: start_date
+            data_tests: [not_null]
+          - name: end_date
+            data_tests: [not_null]
+          - name: fetched_at
+            description: UTC time the response was fetched.
+          - name: request_url
+            description: The URL that produced the response (batched requests share it).
+          - name: response
+            description: JSON text of the location object, with hourly lists.

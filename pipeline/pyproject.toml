@@ -1,0 +1,36 @@
+[project]
+name = "rainman-pipeline"
+version = "0.1.0"
+description = "Forecast accuracy pipeline for RainMan: Dagster + dbt + DuckDB/MotherDuck"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+  "dagster==1.9.13",
+  "dagster-webserver==1.9.13",
+  "dagster-dbt==0.25.13",
+  "dagster-duckdb==0.25.13",
+  "dbt-core==1.9.4",
+  "dbt-duckdb==1.9.3",
+  "duckdb==1.2.2",
+  "requests==2.32.3",
+]
+
+[dependency-groups]
+dev = [
+  "pytest==8.3.5",
+  "ruff==0.11.8",
+  "jsonschema==4.23.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["rainman_pipeline*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = [".venv", "dbt/target", "dbt/dbt_packages"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B"]

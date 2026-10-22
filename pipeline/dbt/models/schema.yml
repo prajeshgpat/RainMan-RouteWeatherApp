@@ -1,0 +1,172 @@
+version: 2
+
+models:
+  - name: stg_corridors
+    description: Corridors from the seed, one row per drive.
+    columns:
+      - name: corridor_id
+        data_tests: [not_null, unique]
+      - name: name
+        data_tests: [not_null]
+
+  - name: stg_corridor_points
+    description: >
+      Sample points along each corridor, with `eta_hour_offset`, the hours after departure at
+      which the driver reaches the point (eta rounded like the app's hourIndex).
+    data_tests:
+      - dbt_utils_free_unique_combination:
+          columns: [corridor_id, seq]
+    columns:
+      - name: corridor_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_corridors')
+              field: corridor_id
+      - name: seq
+        data_tests: [not_null]
+      - name: lat
+        data_tests: [not_null]
+      - name: lng
+        data_tests: [not_null]
+      - name: eta_hours
+        data_tests: [not_null]
+
+  - name: stg_point_hours
+    description: >
+      One row per (point, valid hour, lead day). Forecast columns come from the model run issued
+      `lead_day` days before the valid hour; `obs_*` columns are the analysis-hour actuals.
+    columns:
+      - name: valid_hour
+        data_tests: [not_null]
+      - name: lead_day
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2, 3, 4, 5]
+              quote: false
+      - name: f_pop
+        description: Forecast probability of precipitation, 0..1.
+
+  - name: int_point_hour_forecast
+    description: >
+      Point-hour-lead rows that have a forecast and observations, scored with the app's
+      hourBadness and compared with what happened.
+    data_tests:
+      - dbt_utils_free_unique_combination:
+          columns: [lat, lng, valid_hour, lead_day]
+    columns:
+      - name: badness
+        description: Same value the app's hourBadness gives for the forecast entry (0 good .. 1 awful).
+        data_tests: [not_null]
+      - name: badness_class
+        data_tests:
+          - accepted_values:
+              values: [good, okay, bad]
+      - name: obs_wet
+        description: Observed at least 0.1 mm in the hour, or a precipitation weather code (>= 51).
+        data_tests: [not_null]
+      - name: f_wet
+        description: Forecast probability >= 50% or a precipitation weather code.
+        data_tests: [not_null]
+
+  - name: int_trip_departures
+    description: >
+      One row per (corridor, departure hour, lead day) with the app's trip score and class, and
+      whether the drive was dry. Only departures with data at every point.
+    data_tests:
+      - dbt_utils_free_unique_combination:
+          columns: [corridor_id, departure_hour, lead_day]
+    columns:
+      - name: corridor_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_corridors')
+              field: corridor_id
+      - name: departure_hour
+        data_tests: [not_null]
+      - name: lead_day
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2, 3, 4, 5]
+              quote: false
+      - name: trip_score
+        data_tests: [not_null]
+      - name: trip_class
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [good, okay, bad]
+      - name: trip_dry
+        data_tests: [not_null]
+
+  - name: mart_accuracy_by_lead_day
+    description: Headline accuracy per lead day (trip dry rates, Brier score, POD, FAR).
+    columns:
+      - name: lead_day
+        data_tests: [not_null, unique]
+      - name: green_trip_dry_rate
+        description: Share of green-rated trips that were dry.
+        data_tests: [{ rate_between_0_and_1: {} }]
+      - name: okay_trip_dry_rate
+        data_tests: [{ rate_between_0_and_1: {} }]
+      - name: bad_trip_wet_rate
+        description: Share of red-rated trips that were wet.
+        data_tests: [{ rate_between_0_and_1: {} }]
+      - name: brier_pop
+        description: Mean squared error of the rain probability against observed wet (0 best).
+        data_tests: [{ rate_between_0_and_1: {} }]
+      - name: rain_pod
+        description: Probability of detection - observed wet hours that were forecast wet.
+        data_tests: [{ rate_between_0_and_1: {} }]
+      - name: rain_far
+        description: False alarm ratio - forecast wet hours that stayed dry.
+        data_tests: [{ rate_between_0_and_1: {} }]
+
+  - name: mart_accuracy_by_corridor
+    description: Day-1 accuracy per corridor.
+    columns:
+      - name: corridor_id
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              to: ref('stg_corridors')
+              field: corridor_id
+      - name: green_trip_dry_rate_day1
+        data_tests: [{ rate_between_0_and_1: {} }]
+      - name: brier_pop_day1
+        data_tests: [{ rate_between_0_and_1: {} }]
+
+  - name: mart_accuracy_summary
+    description: Window, corridor, point and departure counts behind the accuracy numbers.
+    columns:
+      - name: window_start
+        data_tests: [not_null]
+      - name: window_end
+        data_tests: [not_null]
+
+seeds:
+  - name: corridors
+    description: >
+      The drives we evaluate. Points were chosen as known towns / interchanges on the real
+      highway, see corridor_points.
+    columns:
+      - name: corridor_id
+        data_tests: [not_null, unique]
+  - name: corridor_points
+    description: >
+      Sample points along each corridor, roughly 10-55 miles apart (mostly 20-40) at towns or
+      interchanges on the real highway. eta_hours is the cumulative great-circle distance x 1.12 at
+      60 mph, generated by pipeline/scripts/gen_corridors.py.
+    columns:
+      - name: corridor_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('corridors')
+              field: corridor_id
+      - name: eta_hours
+        data_tests: [not_null]
