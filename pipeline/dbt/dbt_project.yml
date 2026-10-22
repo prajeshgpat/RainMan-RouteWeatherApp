@@ -1,0 +1,40 @@
+name: rainman
+version: "1.0.0"
+config-version: 2
+profile: rainman
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+test-paths: ["tests"]
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+vars:
+  # Warn when the newest observed hour is older than this (see tests/assert_data_is_fresh.sql)
+  freshness_warn_days: 3
+
+seeds:
+  rainman:
+    +schema: raw
+    corridors:
+      +column_types:
+        total_miles: double
+    corridor_points:
+      +column_types:
+        seq: integer
+        lat: double
+        lng: double
+        eta_hours: double
+
+models:
+  rainman:
+    staging:
+      +schema: staging
+      +materialized: view
+    intermediate:
+      +schema: intermediate
+      +materialized: table
+    marts:
+      +schema: marts
+      +materialized: table

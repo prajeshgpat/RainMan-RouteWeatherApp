@@ -1,0 +1,13 @@
+corridor_id,name,origin,destination,highway,total_miles
+sf_la_i5,San Francisco → Los Angeles (I-5),San Francisco,Los Angeles,I-580/I-5,415.7
+sea_pdx_i5,Seattle → Portland (I-5),Seattle,Portland,I-5,177.3
+den_vail_i70,Denver → Vail (I-70),Denver,Vail,I-70,92.2
+chi_det_i94,Chicago → Detroit (I-94),Chicago,Detroit,I-94,293.5
+bos_nyc_i95,Boston → New York (I-95),Boston,New York,I-95,234.6
+atl_nash_i75,Atlanta → Nashville (I-75/I-24),Atlanta,Nashville,I-75/I-24,250.3
+dal_hou_i45,Dallas → Houston (I-45),Dallas,Houston,I-45,259.9
+phx_flg_i17,Phoenix → Flagstaff (I-17),Phoenix,Flagstaff,I-17,147.8
+slc_boi_i84,Salt Lake City → Boise (I-15/I-84),Salt Lake City,Boise,I-15/I-84,361.1
+mia_orl_turnpike,Miami → Orlando (Florida's Turnpike),Miami,Orlando,Florida's Turnpike,256.5
+msp_dul_i35,Minneapolis → Duluth (I-35),Minneapolis,Duluth,I-35,164.0
+reno_sac_i80,Reno → Sacramento via Truckee (I-80),Reno,Sacramento,I-80,132.0
