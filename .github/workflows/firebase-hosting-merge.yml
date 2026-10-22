@@ -36,6 +36,9 @@ jobs:
       - run: npm --prefix functions test
       - run: npm --prefix functions run build
       - run: npm run build
+        env:
+          # Public, referrer-restricted browser key, set as a repository variable
+          VITE_GOOGLE_MAPS_KEY: ${{ vars.VITE_GOOGLE_MAPS_KEY }}
       - name: Install the Playwright browser
         run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
@@ -53,9 +56,11 @@ jobs:
           if_no_artifact_found: warn
 
       - name: Refuse to deploy a build without the Google Maps key
+        env:
+          VITE_GOOGLE_MAPS_KEY: ${{ vars.VITE_GOOGLE_MAPS_KEY }}
         run: |
-          if grep -rl "REPLACE_WITH_PUBLIC_REFERRER_RESTRICTED_KEY" dist; then
-            echo "::error::.env.production still has the placeholder VITE_GOOGLE_MAPS_KEY"
+          if [ -z "$VITE_GOOGLE_MAPS_KEY" ] || grep -rl "REPLACE_WITH_PUBLIC_REFERRER_RESTRICTED_KEY" dist; then
+            echo "::error::Set the VITE_GOOGLE_MAPS_KEY repository variable (Settings > Secrets and variables > Actions > Variables)"
             exit 1
           fi
 
