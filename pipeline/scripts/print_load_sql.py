@@ -18,7 +18,7 @@ SEEDS = Path(__file__).resolve().parent.parent / "dbt" / "seeds"
 if __name__ == "__main__":
     start, end = date.fromisoformat(sys.argv[1]), date.fromisoformat(sys.argv[2])
     batch = int(sys.argv[3]) if len(sys.argv) > 3 else 10
-    max_days = int(sys.argv[4]) if len(sys.argv) > 4 else 31
+    max_days = int(sys.argv[4]) if len(sys.argv) > 4 else 92
     points = load_points(SEEDS)
     for w_start, w_end in windows(start, end, max_days):
         for pts in chunked(points, batch):

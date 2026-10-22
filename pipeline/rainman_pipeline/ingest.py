@@ -79,7 +79,7 @@ def chunked[T](items: list[T], size: int) -> Iterator[list[T]]:
         yield items[i : i + size]
 
 
-def windows(start: date, end: date, max_days: int = 31) -> Iterator[tuple[date, date]]:
+def windows(start: date, end: date, max_days: int = 92) -> Iterator[tuple[date, date]]:
     """Split [start, end] into consecutive windows of at most max_days days."""
     cur = start
     while cur <= end:
@@ -168,7 +168,7 @@ def ingest(
     end: date,
     fetch: Fetcher = http_fetch,
     batch_size: int = 10,
-    max_window_days: int = 31,
+    max_window_days: int = 92,
 ) -> int:
     """Fetch every point for [start, end] in batched requests and upsert the raw responses."""
     total = 0
