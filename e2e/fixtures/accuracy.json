@@ -1,0 +1,96 @@
+{
+  "generated_at": "2026-10-22T06:00:00Z",
+  "window": { "start": "2026-07-24", "end": "2026-10-20" },
+  "corridors": 12,
+  "points": 84,
+  "departures_evaluated": 123456,
+  "headline": { "lead_day": 1, "green_trip_dry_rate": 0.91, "n_green_trips": 8123 },
+  "by_lead_day": [
+    {
+      "lead_day": 1,
+      "green_trip_dry_rate": 0.91,
+      "okay_trip_dry_rate": 0.7,
+      "bad_trip_wet_rate": 0.62,
+      "brier_pop": 0.08,
+      "rain_pod": 0.74,
+      "rain_far": 0.31,
+      "n_trips": 25000,
+      "n_point_hours": 180000
+    },
+    {
+      "lead_day": 2,
+      "green_trip_dry_rate": 0.88,
+      "okay_trip_dry_rate": 0.66,
+      "bad_trip_wet_rate": 0.57,
+      "brier_pop": 0.09,
+      "rain_pod": 0.7,
+      "rain_far": 0.35,
+      "n_trips": 24800,
+      "n_point_hours": 179000
+    },
+    {
+      "lead_day": 3,
+      "green_trip_dry_rate": 0.85,
+      "okay_trip_dry_rate": 0.63,
+      "bad_trip_wet_rate": 0.53,
+      "brier_pop": 0.1,
+      "rain_pod": 0.65,
+      "rain_far": 0.4,
+      "n_trips": 24600,
+      "n_point_hours": 178000
+    },
+    {
+      "lead_day": 4,
+      "green_trip_dry_rate": 0.82,
+      "okay_trip_dry_rate": 0.6,
+      "bad_trip_wet_rate": 0.5,
+      "brier_pop": 0.11,
+      "rain_pod": 0.6,
+      "rain_far": 0.44,
+      "n_trips": 24400,
+      "n_point_hours": 177000
+    },
+    {
+      "lead_day": 5,
+      "green_trip_dry_rate": 0.79,
+      "okay_trip_dry_rate": 0.58,
+      "bad_trip_wet_rate": 0.47,
+      "brier_pop": 0.12,
+      "rain_pod": 0.55,
+      "rain_far": 0.48,
+      "n_trips": 24200,
+      "n_point_hours": 176000
+    }
+  ],
+  "by_corridor": [
+    {
+      "corridor_id": "sf_la_i5",
+      "name": "San Francisco → Los Angeles (I-5)",
+      "green_trip_dry_rate_day1": 0.97,
+      "brier_pop_day1": 0.04,
+      "n_trips_day1": 2100
+    },
+    {
+      "corridor_id": "sea_pdx_i5",
+      "name": "Seattle → Portland (I-5)",
+      "green_trip_dry_rate_day1": 0.78,
+      "brier_pop_day1": 0.14,
+      "n_trips_day1": 1980
+    },
+    {
+      "corridor_id": "den_vail_i70",
+      "name": "Denver → Vail (I-70)",
+      "green_trip_dry_rate_day1": 0.9,
+      "brier_pop_day1": 0.09,
+      "n_trips_day1": 2050
+    },
+    {
+      "corridor_id": "mia_orl_turnpike",
+      "name": "Miami → Orlando (Florida's Turnpike)",
+      "green_trip_dry_rate_day1": 0.84,
+      "brier_pop_day1": 0.12,
+      "n_trips_day1": 1900
+    }
+  ],
+  "methodology_url": "https://github.com/prajeshgpat/RainMan-RouteWeatherApp/blob/main/pipeline/README.md"
+}
