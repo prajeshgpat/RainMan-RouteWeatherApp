@@ -71,3 +71,14 @@ prod
 logo
 # macOS
 .DS_Store
+
+# Build output and test artifacts
+dist
+functions/lib
+playwright-report
+test-results
+.env.local
+.env.*.local
+firebase.emulator.json
+.firebase
+firebase-debug.log

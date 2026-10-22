@@ -1,61 +1,4 @@
-:root {
-  color-scheme: light;
-  --blue: #166aea;
-  --blue-hover: #3283ff;
-  --on-blue: #fff;
-  --ink: #0b1f3a;
-  --muted: #5b6573;
-  --good: #2e9e5b;
-  --okay: #e8b923;
-  --bad: #d64545;
-  --bg: #fff;
-  --card: #fff;
-  --input-bg: #f3f5f8;
-  --input-border: #d5dbe3;
-  --hover: #eef4ff;
-  --chip-bg: #eef1f5;
-  --error-bg: #fdecec;
-  --error-text: #8a1f1f;
-  --track: #c5cdd8;
-  --day-line: #9aa5b4;
-  --night: #3b4a78;
-  --alert-red-bg: #fdecec;
-  --alert-red-text: #7a1717;
-  --alert-amber-bg: #fff4d6;
-  --alert-amber-text: #6b4b00;
-  --shadow: rgba(0, 0, 0, 0.3);
-}
-
-/* Dark mode follows the system setting (the Google map gets its night style in script.js) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-    --blue: #7fb2ff;
-    --blue-hover: #a3c6ff;
-    --on-blue: #06152b;
-    --ink: #e8edf4;
-    --muted: #a0abba;
-    --good: #3dbb73;
-    --okay: #e8b923;
-    --bad: #e8605f;
-    --bg: #11161d;
-    --card: #1b232e;
-    --input-bg: #263140;
-    --input-border: #3a4657;
-    --hover: #26354b;
-    --chip-bg: #2a3544;
-    --error-bg: #3a1f22;
-    --error-text: #ffb4b4;
-    --track: #46556a;
-    --day-line: #5d6b7e;
-    --night: #8d9fe0;
-    --alert-red-bg: #3a1f22;
-    --alert-red-text: #ffb4b4;
-    --alert-amber-bg: #3a3017;
-    --alert-amber-text: #f6d77a;
-    --shadow: rgba(0, 0, 0, 0.6);
-  }
-}
+@import "./tokens.css";
 
 [hidden] {
   display: none !important;
@@ -126,10 +69,19 @@ body {
 }
 
 /* Keeps the title centred opposite the unit toggle */
-.navbar::before {
-  content: "";
+.nav-link {
   flex: none;
   width: 70px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.nav-link:hover,
+.nav-link:focus-visible {
+  color: var(--blue);
+  text-decoration: underline;
 }
 
 /* Map fills everything between the navbar and the time bar */
