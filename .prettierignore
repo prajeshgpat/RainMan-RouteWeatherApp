@@ -1,0 +1,12 @@
+dist
+node_modules
+coverage
+playwright-report
+test-results
+functions/lib
+functions/node_modules
+package-lock.json
+public/icons
+pipeline
+*.old.js
+public

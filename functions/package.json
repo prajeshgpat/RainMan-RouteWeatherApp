@@ -1,0 +1,27 @@
+{
+  "name": "rainman-functions",
+  "private": true,
+  "description": "RainMan backend: cached Open-Meteo forecast and NWS alert proxy (Firebase Functions v2)",
+  "main": "lib/index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "sync-shared": "node ../scripts/sync-shared.mjs",
+    "prebuild": "npm run sync-shared",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "smoke": "node ../scripts/emulator-smoke.mjs"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.10.0",
+    "firebase-functions": "^6.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.43",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.7"
+  }
+}

@@ -1,0 +1,114 @@
+corridor_id,seq,label,lat,lng,eta_hours
+sf_la_i5,0,San Francisco,37.77,-122.42,0.0
+sf_la_i5,1,Livermore,37.68,-121.77,0.673
+sf_la_i5,2,Tracy,37.74,-121.43,1.029
+sf_la_i5,3,Patterson,37.47,-121.13,1.493
+sf_la_i5,4,Santa Nella,37.1,-120.87,2.039
+sf_la_i5,5,Mendota,36.75,-120.38,2.717
+sf_la_i5,6,Harris Ranch,36.25,-120.25,3.376
+sf_la_i5,7,Kettleman City,35.99,-119.96,3.827
+sf_la_i5,8,Buttonwillow,35.4,-119.49,4.733
+sf_la_i5,9,Grapevine,34.93,-118.95,5.565
+sf_la_i5,10,Castaic,34.49,-118.61,6.237
+sf_la_i5,11,Los Angeles,34.05,-118.24,6.928
+sea_pdx_i5,0,Seattle,47.61,-122.33,0.0
+sea_pdx_i5,1,Tacoma,47.25,-122.44,0.474
+sea_pdx_i5,2,Olympia,47.04,-122.9,0.96
+sea_pdx_i5,3,Centralia,46.72,-122.95,1.375
+sea_pdx_i5,4,Castle Rock,46.28,-122.91,1.944
+sea_pdx_i5,5,Woodland,45.9,-122.75,2.454
+sea_pdx_i5,6,Vancouver WA,45.64,-122.66,2.799
+sea_pdx_i5,7,Portland,45.52,-122.68,2.955
+den_vail_i70,0,Denver,39.74,-104.99,0.0
+den_vail_i70,1,Idaho Springs,39.74,-105.51,0.516
+den_vail_i70,2,Eisenhower Tunnel,39.68,-105.91,0.92
+den_vail_i70,3,Copper Mountain,39.5,-106.15,1.253
+den_vail_i70,4,Vail,39.64,-106.37,1.537
+chi_det_i94,0,Chicago,41.88,-87.63,0.0
+chi_det_i94,1,Gary,41.59,-87.35,0.461
+chi_det_i94,2,Michigan City,41.71,-86.9,0.921
+chi_det_i94,3,Benton Harbor,42.11,-86.45,1.594
+chi_det_i94,4,Paw Paw,42.22,-85.89,2.148
+chi_det_i94,5,Kalamazoo,42.29,-85.59,2.448
+chi_det_i94,6,Marshall,42.27,-84.96,3.05
+chi_det_i94,7,Jackson,42.25,-84.4,3.585
+chi_det_i94,8,Chelsea,42.32,-84.02,3.959
+chi_det_i94,9,Ann Arbor,42.28,-83.74,4.231
+chi_det_i94,10,Detroit,42.33,-83.05,4.892
+bos_nyc_i95,0,Boston,42.36,-71.06,0.0
+bos_nyc_i95,1,Foxborough,42.07,-71.25,0.416
+bos_nyc_i95,2,Providence,41.82,-71.41,0.773
+bos_nyc_i95,3,Wickford,41.57,-71.49,1.104
+bos_nyc_i95,4,Westerly,41.38,-71.83,1.514
+bos_nyc_i95,5,New London,41.36,-72.1,1.777
+bos_nyc_i95,6,Old Saybrook,41.3,-72.38,2.059
+bos_nyc_i95,7,New Haven,41.31,-72.92,2.582
+bos_nyc_i95,8,Bridgeport,41.18,-73.19,2.893
+bos_nyc_i95,9,Stamford,41.05,-73.54,3.272
+bos_nyc_i95,10,New Rochelle,40.91,-73.78,3.568
+bos_nyc_i95,11,New York,40.71,-74.01,3.91
+atl_nash_i75,0,Atlanta,33.75,-84.39,0.0
+atl_nash_i75,1,Marietta,33.95,-84.55,0.31
+atl_nash_i75,2,Cartersville,34.17,-84.8,0.699
+atl_nash_i75,3,Calhoun,34.5,-84.95,1.154
+atl_nash_i75,4,Dalton,34.77,-84.97,1.503
+atl_nash_i75,5,Chattanooga,35.05,-85.31,2.013
+atl_nash_i75,6,Monteagle,35.24,-85.84,2.623
+atl_nash_i75,7,Manchester,35.48,-86.09,3.029
+atl_nash_i75,8,Murfreesboro,35.85,-86.39,3.6
+atl_nash_i75,9,Nashville,36.16,-86.78,4.171
+dal_hou_i45,0,Dallas,32.78,-96.8,0.0
+dal_hou_i45,1,Ennis,32.33,-96.63,0.609
+dal_hou_i45,2,Corsicana,32.1,-96.47,0.953
+dal_hou_i45,3,Fairfield,31.72,-96.16,1.549
+dal_hou_i45,4,Buffalo,31.46,-96.06,1.902
+dal_hou_i45,5,Madisonville,30.95,-95.91,2.581
+dal_hou_i45,6,Huntsville,30.72,-95.55,3.078
+dal_hou_i45,7,Conroe,30.31,-95.46,3.616
+dal_hou_i45,8,Houston,29.76,-95.37,4.332
+phx_flg_i17,0,Phoenix,33.45,-112.07,0.0
+phx_flg_i17,1,Anthem,33.86,-112.13,0.533
+phx_flg_i17,2,Black Canyon City,34.07,-112.15,0.804
+phx_flg_i17,3,Cordes Junction,34.3,-112.17,1.102
+phx_flg_i17,4,Camp Verde,34.56,-111.85,1.58
+phx_flg_i17,5,Munds Park,34.9,-111.63,2.076
+phx_flg_i17,6,Flagstaff,35.2,-111.65,2.464
+slc_boi_i84,0,Salt Lake City,40.76,-111.89,0.0
+slc_boi_i84,1,Ogden,41.22,-111.97,0.598
+slc_boi_i84,2,Brigham City,41.51,-112.02,0.976
+slc_boi_i84,3,Tremonton,41.71,-112.17,1.271
+slc_boi_i84,4,Snowville,41.97,-112.72,1.897
+slc_boi_i84,5,Raft River,42.15,-113.05,2.289
+slc_boi_i84,6,Malta,42.3,-113.37,2.651
+slc_boi_i84,7,Burley,42.54,-113.79,3.157
+slc_boi_i84,8,Twin Falls,42.56,-114.46,3.794
+slc_boi_i84,9,Bliss,42.93,-114.95,4.459
+slc_boi_i84,10,Glenns Ferry,42.95,-115.3,4.791
+slc_boi_i84,11,Mountain Home,43.13,-115.69,5.226
+slc_boi_i84,12,Boise,43.62,-116.2,6.018
+mia_orl_turnpike,0,Miami,25.76,-80.19,0.0
+mia_orl_turnpike,1,Pompano Beach,26.23,-80.12,0.612
+mia_orl_turnpike,2,Boynton Beach,26.53,-80.09,1.0
+mia_orl_turnpike,3,West Palm Beach,26.71,-80.05,1.237
+mia_orl_turnpike,4,Port St. Lucie,27.3,-80.35,2.072
+mia_orl_turnpike,5,Fort Pierce,27.45,-80.33,2.267
+mia_orl_turnpike,6,Yeehaw Junction,27.7,-80.9,2.994
+mia_orl_turnpike,7,Kissimmee,28.29,-81.41,3.951
+mia_orl_turnpike,8,Orlando,28.54,-81.38,4.276
+msp_dul_i35,0,Minneapolis,44.98,-93.27,0.0
+msp_dul_i35,1,Forest Lake,45.28,-92.99,0.463
+msp_dul_i35,2,North Branch,45.51,-92.99,0.76
+msp_dul_i35,3,Hinckley,46.01,-92.94,1.406
+msp_dul_i35,4,Sandstone,46.13,-92.87,1.573
+msp_dul_i35,5,Moose Lake,46.45,-92.76,1.998
+msp_dul_i35,6,Carlton,46.66,-92.43,2.396
+msp_dul_i35,7,Duluth,46.79,-92.1,2.733
+reno_sac_i80,0,Reno,39.53,-119.81,0.0
+reno_sac_i80,1,Verdi,39.52,-119.99,0.18
+reno_sac_i80,2,Truckee,39.33,-120.18,0.489
+reno_sac_i80,3,Donner Summit,39.31,-120.33,0.641
+reno_sac_i80,4,Kingvale,39.31,-120.43,0.741
+reno_sac_i80,5,Colfax,39.1,-120.95,1.327
+reno_sac_i80,6,Auburn,38.9,-121.08,1.616
+reno_sac_i80,7,Roseville,38.75,-121.29,1.902
+reno_sac_i80,8,Sacramento,38.58,-121.49,2.2
