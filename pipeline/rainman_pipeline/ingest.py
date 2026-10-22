@@ -3,9 +3,8 @@
 The fetch step is a plain function `Fetcher = Callable[[str], str]` (URL in, response text out),
 so tests and offline replays pass a fixture fetcher while Dagster uses `http_fetch`.
 
-`load_sql` renders the SAME load as server-side DuckDB SQL (read_text on the URL). That is how the
-initial backfill into MotherDuck was run from environments where only SQL can reach the API; the
-parity test in tests/test_ingest.py checks that both paths store identical rows.
+The pipeline only ingests going forward: every run fetches the last few days and upserts them,
+so the evaluated window grows as daily runs accumulate.
 """
 
 from __future__ import annotations
@@ -23,6 +22,7 @@ import requests
 
 API_URL = "https://previous-runs-api.open-meteo.com/v1/forecast"
 LEAD_DAYS = (1, 2, 3, 4, 5)
+DEFAULT_DAYS = 5  # Previous Runs data only reaches back a few days per daily run
 # Actuals are the analysis-hour weather_code / precipitation; forecasts are `*_previous_dayN`.
 HOURLY_VARS: tuple[str, ...] = ("weather_code", "precipitation", "is_day") + tuple(
     f"{name}_previous_day{n}"
@@ -79,16 +79,7 @@ def chunked[T](items: list[T], size: int) -> Iterator[list[T]]:
         yield items[i : i + size]
 
 
-def windows(start: date, end: date, max_days: int = 92) -> Iterator[tuple[date, date]]:
-    """Split [start, end] into consecutive windows of at most max_days days."""
-    cur = start
-    while cur <= end:
-        stop = min(cur + timedelta(days=max_days - 1), end)
-        yield cur, stop
-        cur = stop + timedelta(days=1)
-
-
-def default_window(days: int, today: date | None = None) -> tuple[date, date]:
+def default_window(days: int = DEFAULT_DAYS, today: date | None = None) -> tuple[date, date]:
     """The last `days` complete UTC days (today's actuals are not final yet)."""
     end = (today or datetime.now(UTC).date()) - timedelta(days=1)
     return end - timedelta(days=days - 1), end
@@ -157,7 +148,9 @@ def upsert(con: duckdb.DuckDBPyConnection, rows: Iterable[RawRow]) -> int:
         for r in rows
     ]
     if data:
-        con.executemany("insert or replace into raw.previous_runs values (?, ?, ?, ?, ?, ?, ?)", data)
+        con.executemany(
+            "insert or replace into raw.previous_runs values (?, ?, ?, ?, ?, ?, ?)", data
+        )
     return len(data)
 
 
@@ -168,44 +161,9 @@ def ingest(
     end: date,
     fetch: Fetcher = http_fetch,
     batch_size: int = 10,
-    max_window_days: int = 92,
 ) -> int:
     """Fetch every point for [start, end] in batched requests and upsert the raw responses."""
     total = 0
-    for w_start, w_end in windows(start, end, max_window_days):
-        for batch in chunked(points, batch_size):
-            total += upsert(con, rows_for_batch(batch, w_start, w_end, fetch))
+    for batch in chunked(points, batch_size):
+        total += upsert(con, rows_for_batch(batch, start, end, fetch))
     return total
-
-
-Request = tuple[list[Point], date, date]
-
-
-def load_sql(requests_: list[Request], source_sql: str | None = None) -> str:
-    """The same load as one server-side DuckDB statement (URLs fetched by read_text).
-
-    Each request is (points, start, end). Coordinates and dates are parsed back out of the URL
-    (`filename` of read_text), so the statement cannot drift from the request. `source_sql`
-    replaces the read_text source for tests: it must yield (filename, content) rows.
-    """
-    urls = [build_url(pts, s, e) for pts, s, e in requests_]
-    if source_sql is None:
-        source_sql = "select filename, content from read_text([" + ", ".join(
-            f"'{u}'" for u in urls
-        ) + "])"
-
-    def part(name: str) -> str:
-        return f"regexp_extract(u, '{name}=([^&]*)', 1)"
-
-    return (
-        "insert or replace into raw.previous_runs\n"
-        f"with body as ({source_sql}),\n"
-        "arr as (select filename as u, (case when json_type(content::json) = 'ARRAY'\n"
-        "  then content::json else json_array(content::json) end) as j from body),\n"
-        "idx as (select u, j, unnest(range(json_array_length(j)::bigint)) as i from arr)\n"
-        f"select string_split({part('latitude')}, ',')[i + 1]::double,\n"
-        f"  string_split({part('longitude')}, ',')[i + 1]::double,\n"
-        f"  {part('start_date')}::date, {part('end_date')}::date,\n"
-        "  now()::timestamp, u, (j -> i)::varchar\n"
-        "from idx"
-    )
