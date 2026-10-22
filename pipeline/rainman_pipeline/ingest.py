@@ -178,26 +178,34 @@ def ingest(
     return total
 
 
-def load_sql(points: list[Point], start: date, end: date) -> str:
-    """The same load as server-side DuckDB SQL (the URL is fetched by read_text).
+Request = tuple[list[Point], date, date]
 
-    The URL is set once as a session variable; coordinates and dates are parsed back out of it,
-    so the statement cannot drift from the request.
+
+def load_sql(requests_: list[Request], source_sql: str | None = None) -> str:
+    """The same load as one server-side DuckDB statement (URLs fetched by read_text).
+
+    Each request is (points, start, end). Coordinates and dates are parsed back out of the URL
+    (`filename` of read_text), so the statement cannot drift from the request. `source_sql`
+    replaces the read_text source for tests: it must yield (filename, content) rows.
     """
-    url = build_url(points, start, end)
+    urls = [build_url(pts, s, e) for pts, s, e in requests_]
+    if source_sql is None:
+        source_sql = "select filename, content from read_text([" + ", ".join(
+            f"'{u}'" for u in urls
+        ) + "])"
 
     def part(name: str) -> str:
-        return f"regexp_extract(getvariable('u'), '{name}=([^&]*)', 1)"
+        return f"regexp_extract(u, '{name}=([^&]*)', 1)"
 
     return (
-        f"set variable u = '{url}';\n"
         "insert or replace into raw.previous_runs\n"
-        "with body as (select (case when json_type(content::json) = 'ARRAY' then content::json\n"
-        "  else json_array(content::json) end) as j from read_text(getvariable('u'))),\n"
-        "idx as (select j, unnest(range(json_array_length(j)::bigint)) as i from body)\n"
+        f"with body as ({source_sql}),\n"
+        "arr as (select filename as u, (case when json_type(content::json) = 'ARRAY'\n"
+        "  then content::json else json_array(content::json) end) as j from body),\n"
+        "idx as (select u, j, unnest(range(json_array_length(j)::bigint)) as i from arr)\n"
         f"select string_split({part('latitude')}, ',')[i + 1]::double,\n"
         f"  string_split({part('longitude')}, ',')[i + 1]::double,\n"
         f"  {part('start_date')}::date, {part('end_date')}::date,\n"
-        "  now()::timestamp, getvariable('u'), (j -> i)::varchar\n"
+        "  now()::timestamp, u, (j -> i)::varchar\n"
         "from idx"
     )
